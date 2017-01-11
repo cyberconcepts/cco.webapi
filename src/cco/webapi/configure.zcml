@@ -1,0 +1,67 @@
+<configure
+   xmlns:zope="http://namespaces.zope.org/zope"
+   xmlns:browser="http://namespaces.zope.org/browser"
+   i18n_domain="cco.webapi">  
+
+  <!-- node classes -->
+
+  <zope:class class="cco.webapi.node.ApiNode">
+    <implements interface="zope.annotation.interfaces.IAttributeAnnotatable" />
+    <factory id="cco.webapi.ApiNode" description="API Node" />
+    <require
+        permission="zope.View"
+        interface="cco.webapi.interfaces.IApiNode" />
+    <require
+        permission="zope.ManageContent"
+        set_schema="cco.webapi.interfaces.IApiNode" />
+  </zope:class>
+
+  <!-- admin views -->
+
+  <browser:addform
+      label="Add API Node"
+      name="AddCcoApiNode.html"
+      content_factory="cco.webapi.node.ApiNode"
+      schema="cco.webapi.interfaces.IApiNode"
+      fields="title description nodeType viewName"
+      template="browser/add.pt"
+      permission="zope.ManageContent">
+    <widget field="description" height="2" />
+    <widget field="body" height="3" />
+  </browser:addform>
+
+  <browser:addMenuItem
+      class="cco.webapi.node.ApiNode"
+      title="API Node"
+      description="An API node allows access via REST+JSON"
+      permission="zope.ManageContent"
+      view="AddCcoApiNode.html" />
+
+  <browser:editform
+      label="Edit API Node"
+      name="edit.html"
+      schema="cco.webapi.interfaces.IApiNode"
+      fields="title description nodeType viewName"
+      for="cco.webapi.interfaces.IApiNode"
+      template="browser/edit.pt"
+      permission="zope.ManageContent">
+    <widget field="description" height="2" />
+    <widget field="body" height="3" />
+  </browser:editform>
+
+  <!-- API traverser and views -->
+
+  <zope:view factory="cco.webapi.api.ApiTraverser"
+      for="cco.webapi.interfaces.IApiNode"
+      type="zope.publisher.interfaces.http.IHTTPRequest"
+      provides="zope.publisher.interfaces.browser.IBrowserPublisher"
+      allowed_interface="zope.publisher.interfaces.browser.IBrowserPublisher"
+      permission="zope.Public" />
+
+  <browser:page
+      name="index.html"
+      for="cco.webapi.interfaces.IApiNode"
+      class="cco.webapi.api.ApiView"
+      permission="zope.View" />
+
+</configure>
