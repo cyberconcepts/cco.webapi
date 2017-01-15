@@ -1,4 +1,3 @@
-global-include *.md *.txt
-global-include *.mo *.po *.pot
+global-include *.md *.rst *.txt
 global-include *.pt
 global-include *.zcml

@@ -1,16 +1,12 @@
 # Introduction
 
 This is one of a series of Python packages for
-the Zope-based knowledge management platform 
+the Zope-based web application platform 
 [loops](http://www.cyberconcepts.de) (in German).
 
-It contains functionalities for controlling and 
-configuring fields in data entry forms and display views. 
+It provides access to the loops database via a
+REST+JSON Web API.
 
-There will be new modules as well as modules migrated from 
-the current loops and cybertools repositories.
-
-For more information see
+For more information on loops and the 
+cyberconcepts.org platform see
 [www.cyberconcepts.org](https://www.cyberconcepts.org).
-
-More to come...
