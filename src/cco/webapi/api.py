@@ -17,25 +17,41 @@
 #
 
 """
-NodeView implementations for access to the REST API.
+View-like implementations for access to the REST API.
 """
 
+from json import dumps
 from zope.app.container.traversal import ItemTraverser
+from zope.traversing.api import getName
 
+from loops.browser.concept import ConceptView
 from loops.browser.node import NodeView
 
 
 class ApiView(NodeView):
 
     def __call__(self, *args, **kw):
-        print '*** API View'
-        return 'API View'
+        self.request.response.setHeader('content-type', 'application/json')
+        targetView = self.viewAnnotations.get('targetView')
+        if targetView is not None:
+            return targetView()
+        result = [dict(name=getName(n)) for n in self.context.values()]
+        return dumps(result)
 
     def get(self, name):
-        print '*** traversing', name
-        # use self.context.viewName to get real view
-        # use this view + name to get target and targetView
-        # put targetView in request annotations
+        print '*** traversing target', name
+        targetContainer = self.context.target
+        if targetContainer is None:
+            # raise AttributeError? / NotFound
+            return None
+        target = self.conceptManager.get(name)
+        if target is None:
+            return None
+        self.viewAnnotations['target'] = target
+        # TODO: find target via targetContainer
+        # TODO: use self.context.viewName (if present) 
+        # and target type (Interface, Adapter) to get target view
+        self.viewAnnotations['targetView'] = ApiTargetView(target, self.request)
         return self.context
 
 
@@ -49,4 +65,12 @@ class ApiTraverser(ItemTraverser):
 
     def defaultTraverse(self, request, name):
         return super(ApiTraverser, self).publishTraverse(request, name)
+
+
+class ApiTargetView(ConceptView):
+
+    def __call__(self, *args, **kw):
+        obj = self.context
+        result = dict(name=getName(obj), title=obj.title)
+        return dumps(result)
 
