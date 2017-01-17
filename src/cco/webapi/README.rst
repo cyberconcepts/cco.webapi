@@ -44,9 +44,9 @@ What happens upon traversing a node?
 
   >>> apiTrav = ApiTraverser(node_topics, req)
   >>> obj = apiTrav.publishTraverse(TestRequest(), 'loops')
-  *** traversing target loops
-  >>> obj is None
-  True
+  Traceback (most recent call last):
+  ...
+  NotFound: ... name: 'loops'
 
 Maybe we should assign a target: we use the topic type and
 create a 'loops' topic.

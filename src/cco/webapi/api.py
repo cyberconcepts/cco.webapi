@@ -43,7 +43,6 @@ class ApiView(NodeView):
         print '*** traversing target', name
         tp = adapted(self.context.target)
         if tp is None:
-            # raise AttributeError? / NotFound
             return None
         cname = tp.conceptManager or 'concepts'
         prefix = tp.namePrefix or ''
