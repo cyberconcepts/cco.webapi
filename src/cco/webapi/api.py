@@ -26,6 +26,7 @@ from zope.traversing.api import getName
 
 from loops.browser.concept import ConceptView
 from loops.browser.node import NodeView
+from loops.common import adapted
 
 
 class ApiView(NodeView):
@@ -40,11 +41,13 @@ class ApiView(NodeView):
 
     def get(self, name):
         print '*** traversing target', name
-        targetContainer = self.context.target
-        if targetContainer is None:
+        tp = adapted(self.context.target)
+        if tp is None:
             # raise AttributeError? / NotFound
             return None
-        target = self.conceptManager.get(name)
+        cname = tp.conceptManager or 'concepts'
+        prefix = tp.namePrefix or ''
+        target = self.loopsRoot[cname].get(prefix + name)
         if target is None:
             return None
         self.viewAnnotations['target'] = target
@@ -59,8 +62,9 @@ class ApiTraverser(ItemTraverser):
 
     def publishTraverse(self, request, name):
         if self.context.get(name) is None:
-            # if targetView present: return.targetView.get(name)
-            return ApiView(self.context, request).get(name)
+            obj = ApiView(self.context, request).get(name)
+            if obj is not None:
+                return obj
         return self.defaultTraverse(request, name)        
 
     def defaultTraverse(self, request, name):
