@@ -22,10 +22,13 @@ Let's first do some common imports and initializations.
 
   >>> req = TestRequest()
 
-We now create the first basic objects
+We now create the first basic objects.
 
   >>> apiRoot = addAndConfigureObject(home, ApiNode, 'webapi')
   >>> node_topics = addAndConfigureObject(apiRoot, ApiNode, 'topics')
+
+Querying the database with the GET method
+-----------------------------------------
 
 We start with calling the API view of the top-level (root) API node.
 
@@ -56,7 +59,7 @@ create a 'loops' topic.
   ...     conceptType=type_topic)
 
   >>> obj = apiTrav.publishTraverse(req, 'loops')
-  *** traversing target loops
+  *** NodeView: traversing loops
   >>> obj is node_topics
   True
 
@@ -67,3 +70,36 @@ view can deliver the correct data.
   >>> apiView()
   '{"name": "loops", "title": ""}'
 
+We can also use the type hierarchy as starting point of our 
+journey.
+
+  >>> node_types = addAndConfigureObject(apiRoot, ApiNode, 'types')
+  >>> node_types.target = type_type
+
+  >>> req = TestRequest()
+  >>> apiTrav = ApiTraverser(apiRoot, req)
+  >>> obj = apiTrav.publishTraverse(req, 'types')
+  >>> obj is node_types
+  True
+
+  >>> apiTrav = ApiTraverser(node_types, req)
+  >>> obj = apiTrav.publishTraverse(req, 'topic')
+  *** NodeView: traversing topic
+  >>> apiView = ApiView(node_types, req)
+  >>> apiView()
+  '{"name": "topic", "title": ""}'
+
+Next steps: 
+- traverse properties of target 'topic'
+- traverse special attributes/methods (children()) of target topic
+
+Can we get a list of types from node_types? 
+(and a list of topics from node_topics)
+
+Creating new objects with POST
+------------------------------
+
+Updating objects with PUT
+-------------------------
+
+Create relationships (links) between objects - assign a child.

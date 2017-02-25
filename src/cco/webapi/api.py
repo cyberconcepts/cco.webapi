@@ -29,6 +29,11 @@ from loops.browser.node import NodeView
 from loops.common import adapted
 
 
+# TODO: provide lower-level (RDF-like) API for accessing the concept map
+#       in a simple and generic way. 
+#       next steps: RDF-like API for resources and tracks
+
+
 class ApiView(NodeView):
 
     def __call__(self, *args, **kw):
@@ -36,24 +41,31 @@ class ApiView(NodeView):
         targetView = self.viewAnnotations.get('targetView')
         if targetView is not None:
             return targetView()
-        result = [dict(name=getName(n)) for n in self.context.values()]
-        return dumps(result)
+        # TODO: check for request.method
+        return dumps(self.getData())
+
+    def getData(self):
+        return [dict(name=getName(n)) for n in self.context.values()]
 
     def get(self, name):
-        print '*** traversing target', name
-        tp = adapted(self.context.target)
-        if tp is None:
-            return None
-        cname = tp.conceptManager or 'concepts'
-        prefix = tp.namePrefix or ''
-        target = self.loopsRoot[cname].get(prefix + name)
-        if target is None:
-            return None
-        self.viewAnnotations['target'] = target
-        # TODO: find target via targetContainer
-        # TODO: use self.context.viewName (if present) 
-        # and target type (Interface, Adapter) to get target view
-        self.viewAnnotations['targetView'] = ApiTargetView(target, self.request)
+        print '*** NodeView: traversing', name
+        targetView = self.viewAnnotations.get('targetView')
+        if targetView is not None:
+            targetView = targetView.getView(name)
+        else:
+            tp = adapted(self.context.target)
+            if tp is None:
+                return None
+            cname = tp.conceptManager or 'concepts'
+            prefix = tp.namePrefix or ''
+            target = self.loopsRoot[cname].get(prefix + name)
+            if target is None:
+                return None
+            # TODO: find target via targetContainer
+            # TODO: use self.context.viewName (if present) 
+            # and target type (Interface, Adapter) to get target view
+            targetView = ApiTargetView(target, self.request)
+        self.viewAnnotations['targetView'] = targetView
         return self.context
 
 
@@ -73,7 +85,29 @@ class ApiTraverser(ItemTraverser):
 class ApiTargetView(ConceptView):
 
     def __call__(self, *args, **kw):
-        obj = self.context
-        result = dict(name=getName(obj), title=obj.title)
-        return dumps(result)
+        # TODO: check for request.method
+        return dumps(self.getData())
 
+    def getData(self):
+        obj = self.context
+        # TODO: use self.adapted and typeInterface to get all properties
+        return dict(name=getName(obj), title=obj.title)
+
+    def getView(self, name):
+        print '*** TargetView: traversing', name
+        # TODO: check for special attributes
+        value = getattr(self.adpated, name, None)
+        return ApiTargetView(value, self.request)
+
+
+class ApiContainerView(ConceptView):
+
+    def __call__(self, *args, **kw):
+        # TODO: check for request.method
+        return dumps(self.getData())
+
+    def getData(self):
+        # TODO: check for real listing method and parameters
+        #       (or produce list in the caller and use it directly as context)
+        lst = self.context.getChildren()
+        return [dict(name=getName(obj), title=obj.title) for obj in lst]
