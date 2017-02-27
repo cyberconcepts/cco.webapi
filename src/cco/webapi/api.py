@@ -44,8 +44,7 @@ class ApiView(NodeView):
             return targetView()
         target = self.context.target
         if target is not None:
-            targetView = component.getMultiAdapter(
-                    (adapted(target), self.request), name='api_container')
+            targetView = self.getContainerView(adapted(target))
             return targetView()
         # TODO: check for request.method
         return dumps(self.getData())
@@ -59,21 +58,17 @@ class ApiView(NodeView):
         if targetView is not None:
             targetView = targetView.getView(name)
         else:
-            tp = adapted(self.context.target)
-            if tp is None:
-                return None
-            # TODO: put retrieving of target in separate method
-            #       to allow easy overriding
-            # TODO: find target via targetContainer
-            cname = tp.conceptManager or 'concepts'
-            prefix = tp.namePrefix or ''
-            target = self.loopsRoot[cname].get(prefix + name)
+            target = self.context.target
             if target is None:
                 return None
-            targetView = component.getMultiAdapter(
-                    (adapted(target), self.request), name='api_target')
+            container = self.getContainerView(adapted(target))
+            targetView = container.getView(name)
         self.viewAnnotations['targetView'] = targetView
         return self.context
+
+    def getContainerView(self, target):
+        return component.getMultiAdapter(
+                    (adapted(target), self.request), name='api_container')
 
 
 class ApiTraverser(ItemTraverser):
@@ -89,6 +84,8 @@ class ApiTraverser(ItemTraverser):
     def defaultTraverse(self, request, name):
         return super(ApiTraverser, self).publishTraverse(request, name)
 
+
+# target / concept views
 
 class ApiTargetView(ConceptView):
 
@@ -120,3 +117,18 @@ class ApiContainerView(ConceptView):
         #       (or produce list in the caller and use it directly as context)
         lst = self.context.getChildren()
         return [dict(name=getName(obj), title=obj.title) for obj in lst]
+
+    def getView(self, name):
+        print '*** ContainerView: traversing', name
+        # TODO: check for special attributes
+        # TODO: retrieve object from list of children
+        # TOOD: use subclass ApiTypeView for this:
+        tp = self.adapted
+        cname = tp.conceptManager or 'concepts'
+        prefix = tp.namePrefix or ''
+        obj = self.loopsRoot[cname].get(prefix + name)
+        if obj is None:
+            return None
+        targetView = component.getMultiAdapter(
+                (adapted(obj), self.request), name='api_target')
+        return targetView

@@ -74,6 +74,7 @@ the view can deliver the correct data.
 
   >>> obj = apiTrav.publishTraverse(req, 'loops')
   *** NodeView: traversing loops
+  *** ContainerView: traversing loops
   >>> obj is node_topics
   True
 
@@ -92,20 +93,21 @@ journey.
   >>> obj = apiTrav.publishTraverse(req, 'types')
   >>> obj is node_types
   True
+  >>> apiView = ApiView(node_types, req)
+  >>> apiView()
+  '[{"name": "topic", "title": ""}, ... {"name": "type", "title": "Type"}]'
 
   >>> apiTrav = ApiTraverser(node_types, req)
   >>> obj = apiTrav.publishTraverse(req, 'topic')
   *** NodeView: traversing topic
+  *** ContainerView: traversing topic
   >>> apiView = ApiView(node_types, req)
   >>> apiView()
   '{"name": "topic", "title": ""}'
 
 Next steps: 
-- traverse properties of target 'topic'
+- traverse properties of target 'topic' (?)
 - traverse special attributes/methods (children()) of target topic
-
-Can we get a list of types from node_types? 
-(and a list of topics from node_topics)
 
 Creating new objects with POST
 ------------------------------
