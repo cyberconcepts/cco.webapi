@@ -41,12 +41,16 @@ What happens upon traversing a node?
 
   >>> from cco.webapi.api import ApiTraverser
   >>> apiTrav = ApiTraverser(apiRoot, req)
-  >>> obj = apiTrav.publishTraverse(TestRequest(), 'topics')
+  >>> obj = apiTrav.publishTraverse(req, 'topics')
   >>> obj is node_topics
   True
 
+  >>> apiView = ApiView(node_topics, req)
+  >>> apiView()
+  '[]'
+
   >>> apiTrav = ApiTraverser(node_topics, req)
-  >>> obj = apiTrav.publishTraverse(TestRequest(), 'loops')
+  >>> obj = apiTrav.publishTraverse(req, 'loops')
   Traceback (most recent call last):
   ...
   NotFound: ... name: 'loops'
@@ -58,13 +62,20 @@ create a 'loops' topic.
   >>> topic_loops = addAndConfigureObject(concepts, Concept, 'loops',
   ...     conceptType=type_topic)
 
+The view now shows a list of the target object's children.
+
+  >>> apiView = ApiView(node_topics, req)
+  >>> apiView()
+  '[{"name": "loops", "title": ""}]'
+
+Now we can also traverse the target object. The traverser still returns
+the node, but the traversed object is remembered in the request so that 
+the view can deliver the correct data.
+
   >>> obj = apiTrav.publishTraverse(req, 'loops')
   *** NodeView: traversing loops
   >>> obj is node_topics
   True
-
-The traversed object is remembered in the request so that the 
-view can deliver the correct data.
 
   >>> apiView = ApiView(node_topics, req)
   >>> apiView()

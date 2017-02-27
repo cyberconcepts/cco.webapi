@@ -22,6 +22,7 @@ View-like implementations for access to the REST API.
 
 from json import dumps
 from zope.app.container.traversal import ItemTraverser
+from zope import component
 from zope.traversing.api import getName
 
 from loops.browser.concept import ConceptView
@@ -41,6 +42,11 @@ class ApiView(NodeView):
         targetView = self.viewAnnotations.get('targetView')
         if targetView is not None:
             return targetView()
+        target = self.context.target
+        if target is not None:
+            targetView = component.getMultiAdapter(
+                    (adapted(target), self.request), name='api_container')
+            return targetView()
         # TODO: check for request.method
         return dumps(self.getData())
 
@@ -56,15 +62,16 @@ class ApiView(NodeView):
             tp = adapted(self.context.target)
             if tp is None:
                 return None
+            # TODO: put retrieving of target in separate method
+            #       to allow easy overriding
+            # TODO: find target via targetContainer
             cname = tp.conceptManager or 'concepts'
             prefix = tp.namePrefix or ''
             target = self.loopsRoot[cname].get(prefix + name)
             if target is None:
                 return None
-            # TODO: find target via targetContainer
-            # TODO: use self.context.viewName (if present) 
-            # and target type (Interface, Adapter) to get target view
-            targetView = ApiTargetView(target, self.request)
+            targetView = component.getMultiAdapter(
+                    (adapted(target), self.request), name='api_target')
         self.viewAnnotations['targetView'] = targetView
         return self.context
 
@@ -73,6 +80,7 @@ class ApiTraverser(ItemTraverser):
 
     def publishTraverse(self, request, name):
         if self.context.get(name) is None:
+            # TODO: use self.context.viewName? (or default)
             obj = ApiView(self.context, request).get(name)
             if obj is not None:
                 return obj
@@ -97,7 +105,8 @@ class ApiTargetView(ConceptView):
         print '*** TargetView: traversing', name
         # TODO: check for special attributes
         value = getattr(self.adpated, name, None)
-        return ApiTargetView(value, self.request)
+        targetView = component.getMultiAdapter(
+                (adapted(value), self.request), name='api_target')
 
 
 class ApiContainerView(ConceptView):

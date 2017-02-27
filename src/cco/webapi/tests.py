@@ -7,10 +7,16 @@ Tests for the 'cco.webapi' package.
 import os
 import unittest, doctest
 from zope.app.testing.setup import placefulSetUp, placefulTearDown
+from zope import component
+from zope.interface import Interface
 from zope.publisher.browser import TestRequest
+from zope.publisher.interfaces.browser import IBrowserRequest
 
+from loops.interfaces import IConceptSchema
 from loops.setup import importData as baseImportData
 from loops.tests.setup import TestSite
+
+from cco.webapi.api import ApiTargetView, ApiContainerView
 
 
 def setUp(self):
@@ -19,6 +25,10 @@ def setUp(self):
     concepts, resources, views = t.setup()
     loopsRoot = site['loops']
     self.globs['loopsRoot'] = loopsRoot
+    component.provideAdapter(ApiTargetView, 
+        (IConceptSchema, IBrowserRequest), Interface, name='api_target')
+    component.provideAdapter(ApiContainerView, 
+        (IConceptSchema, IBrowserRequest), Interface, name='api_container')
 
 
 def tearDown(self):
