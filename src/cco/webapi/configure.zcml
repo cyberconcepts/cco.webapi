@@ -76,4 +76,10 @@
       class="cco.webapi.api.ApiContainerView"
       permission="zope.View" />
 
+  <browser:page
+      name="api_container"
+      for="loops.interfaces.ITypeConcept"
+      class="cco.webapi.api.ApiContainerView"
+      permission="zope.View" />
+
 </configure>

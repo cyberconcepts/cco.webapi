@@ -12,11 +12,11 @@ from zope.interface import Interface
 from zope.publisher.browser import TestRequest
 from zope.publisher.interfaces.browser import IBrowserRequest
 
-from loops.interfaces import IConceptSchema
+from loops.interfaces import IConceptSchema, ITypeConcept
 from loops.setup import importData as baseImportData
 from loops.tests.setup import TestSite
 
-from cco.webapi.api import ApiTargetView, ApiContainerView
+from cco.webapi.api import ApiTargetView, ApiContainerView, ApiTypeView
 
 
 def setUp(self):
@@ -29,6 +29,8 @@ def setUp(self):
         (IConceptSchema, IBrowserRequest), Interface, name='api_target')
     component.provideAdapter(ApiContainerView, 
         (IConceptSchema, IBrowserRequest), Interface, name='api_container')
+    component.provideAdapter(ApiTypeView, 
+        (ITypeConcept, IBrowserRequest), Interface, name='api_container')
 
 
 def tearDown(self):

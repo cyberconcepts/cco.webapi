@@ -30,9 +30,9 @@ from loops.browser.node import NodeView
 from loops.common import adapted
 
 
-# TODO: provide lower-level (RDF-like) API for accessing the concept map
-#       in a simple and generic way. 
-#       next steps: RDF-like API for resources and tracks
+# provide lower-level (RDF-like) API for accessing the concept map
+# in a simple and generic way. 
+# next steps: RDF-like API for resources and tracks
 
 
 class ApiView(NodeView):
@@ -63,6 +63,8 @@ class ApiView(NodeView):
                 return None
             container = self.getContainerView(adapted(target))
             targetView = container.getView(name)
+            if targetView is None:
+                return None
         self.viewAnnotations['targetView'] = targetView
         return self.context
 
@@ -104,6 +106,7 @@ class ApiTargetView(ConceptView):
         value = getattr(self.adpated, name, None)
         targetView = component.getMultiAdapter(
                 (adapted(value), self.request), name='api_target')
+        return targetView
 
 
 class ApiContainerView(ConceptView):
@@ -122,13 +125,19 @@ class ApiContainerView(ConceptView):
         print '*** ContainerView: traversing', name
         # TODO: check for special attributes
         # TODO: retrieve object from list of children
-        # TOOD: use subclass ApiTypeView for this:
-        tp = self.adapted
-        cname = tp.conceptManager or 'concepts'
-        prefix = tp.namePrefix or ''
-        obj = self.loopsRoot[cname].get(prefix + name)
+        obj = self.getObject(name)
         if obj is None:
             return None
         targetView = component.getMultiAdapter(
                 (adapted(obj), self.request), name='api_target')
         return targetView
+
+
+class ApiTypeView(ApiContainerView):
+
+    def getObject(self, name):
+        tp = self.adapted
+        cname = tp.conceptManager or 'concepts'
+        prefix = tp.namePrefix or ''
+        return self.loopsRoot[cname].get(prefix + name)
+
