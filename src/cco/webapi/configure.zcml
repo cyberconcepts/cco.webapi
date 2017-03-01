@@ -79,7 +79,7 @@
   <browser:page
       name="api_container"
       for="loops.interfaces.ITypeConcept"
-      class="cco.webapi.api.ApiContainerView"
+      class="cco.webapi.api.ApiTypeView"
       permission="zope.View" />
 
 </configure>

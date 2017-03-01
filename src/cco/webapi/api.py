@@ -69,15 +69,15 @@ class ApiView(NodeView):
         return self.context
 
     def getContainerView(self, target):
+        viewName = self.context.viewName or 'api_container'
         return component.getMultiAdapter(
-                    (adapted(target), self.request), name='api_container')
+                    (adapted(target), self.request), name=viewName)
 
 
 class ApiTraverser(ItemTraverser):
 
     def publishTraverse(self, request, name):
         if self.context.get(name) is None:
-            # TODO: use self.context.viewName? (or default)
             obj = ApiView(self.context, request).get(name)
             if obj is not None:
                 return obj
