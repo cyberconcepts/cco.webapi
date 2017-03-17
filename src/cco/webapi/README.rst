@@ -92,6 +92,7 @@ journey.
   >>> obj = traverse(apiRoot, req, 'types')
   >>> obj is node_types
   True
+
   >>> apiView = ApiView(obj, req)
   >>> apiView()
   '[{"name": "topic", "title": ""}, ... {"name": "type", "title": "Type"}]'
@@ -100,11 +101,28 @@ journey.
   >>> obj = traverse(apiRoot, req, 'types/topic')
   *** NodeView: traversing topic
   *** ContainerView: traversing topic
+  >>> obj is node_types
+  True
+
   >>> apiView = ApiView(obj, req)
   >>> apiView()
   '{"name": "topic", "title": ""}'
 
-Next steps: 
+  >>> req = TestRequest()
+  >>> obj = traverse(apiRoot, req, 'types/topic/loops')
+  *** NodeView: traversing topic
+  *** ContainerView: traversing topic
+  *** NodeView: traversing loops
+  *** TargetView: traversing loops
+  *** ContainerView: traversing loops
+  >>> obj is node_types
+  True
+
+  >>> apiView = ApiView(obj, req)
+  >>> apiView()
+  '{"name": "loops", "title": ""}'
+
+Next steps (?)
 - traverse properties of target 'topic' (?)
 - traverse special attributes/methods (children()) of target topic
 

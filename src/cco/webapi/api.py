@@ -56,15 +56,20 @@ class ApiView(NodeView):
         print '*** NodeView: traversing', name
         targetView = self.viewAnnotations.get('targetView')
         if targetView is not None:
+            target = targetView.context
             targetView = targetView.getView(name)
+            if targetView is None:
+                cv = self.getContainerView(target)
+                if cv is not None:
+                    targetView = cv.getView(name)
         else:
             target = self.context.target
             if target is None:
                 return None
             container = self.getContainerView(adapted(target))
             targetView = container.getView(name)
-            if targetView is None:
-                return None
+        if targetView is None:
+            return None
         self.viewAnnotations['targetView'] = targetView
         return self.context
 
@@ -103,7 +108,9 @@ class ApiTargetView(ConceptView):
     def getView(self, name):
         print '*** TargetView: traversing', name
         # TODO: check for special attributes
-        value = getattr(self.adpated, name, None)
+        value = getattr(self.adapted, name, None)
+        if value is None:
+            return None
         targetView = component.getMultiAdapter(
                 (adapted(value), self.request), name='api_target')
         return targetView
