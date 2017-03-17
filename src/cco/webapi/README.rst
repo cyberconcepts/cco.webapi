@@ -11,6 +11,8 @@ Let's first do some common imports and initializations.
   >>> log = getLogger('cco.webapi')
 
   >>> from cco.webapi.node import ApiNode
+  >>> from cco.webapi.tests import traverse
+
   >>> from loops.setup import addAndConfigureObject, addObject
   >>> from loops.concept import Concept
 
@@ -19,8 +21,6 @@ Let's first do some common imports and initializations.
   >>> type_topic = addAndConfigureObject(concepts, Concept, 'topic',
   ...     conceptType=type_type)
   >>> home = loopsRoot['views']['home']
-
-  >>> req = TestRequest()
 
 We now create the first basic objects.
 
@@ -33,24 +33,23 @@ Querying the database with the GET method
 We start with calling the API view of the top-level (root) API node.
 
   >>> from cco.webapi.api import ApiView
-  >>> apiView = ApiView(apiRoot, req)
+  >>> apiView = ApiView(apiRoot, TestRequest())
   >>> apiView()
   '[{"name": "topics"}]'
 
 What happens upon traversing a node?
 
-  >>> from cco.webapi.api import ApiTraverser
-  >>> apiTrav = ApiTraverser(apiRoot, req)
-  >>> obj = apiTrav.publishTraverse(req, 'topics')
+  >>> req = TestRequest()
+  >>> obj = traverse(apiRoot, req, 'topics')
   >>> obj is node_topics
   True
 
-  >>> apiView = ApiView(node_topics, req)
+  >>> apiView = ApiView(obj, req)
   >>> apiView()
   '[]'
 
-  >>> apiTrav = ApiTraverser(node_topics, req)
-  >>> obj = apiTrav.publishTraverse(req, 'loops')
+  >>> req = TestRequest()
+  >>> obj = traverse(apiRoot, req, 'topics/loops')
   Traceback (most recent call last):
   ...
   NotFound: ... name: 'loops'
@@ -72,13 +71,14 @@ Now we can also traverse the target object. The traverser still returns
 the node, but the traversed object is remembered in the request so that 
 the view can deliver the correct data.
 
-  >>> obj = apiTrav.publishTraverse(req, 'loops')
+  >>> req = TestRequest()
+  >>> obj = traverse(apiRoot, req, 'topics/loops')
   *** NodeView: traversing loops
   *** ContainerView: traversing loops
   >>> obj is node_topics
   True
 
-  >>> apiView = ApiView(node_topics, req)
+  >>> apiView = ApiView(obj, req)
   >>> apiView()
   '{"name": "loops", "title": ""}'
 
@@ -89,19 +89,18 @@ journey.
   >>> node_types.target = type_type
 
   >>> req = TestRequest()
-  >>> apiTrav = ApiTraverser(apiRoot, req)
-  >>> obj = apiTrav.publishTraverse(req, 'types')
+  >>> obj = traverse(apiRoot, req, 'types')
   >>> obj is node_types
   True
-  >>> apiView = ApiView(node_types, req)
+  >>> apiView = ApiView(obj, req)
   >>> apiView()
   '[{"name": "topic", "title": ""}, ... {"name": "type", "title": "Type"}]'
 
-  >>> apiTrav = ApiTraverser(node_types, req)
-  >>> obj = apiTrav.publishTraverse(req, 'topic')
+  >>> req = TestRequest()
+  >>> obj = traverse(apiRoot, req, 'types/topic')
   *** NodeView: traversing topic
   *** ContainerView: traversing topic
-  >>> apiView = ApiView(node_types, req)
+  >>> apiView = ApiView(obj, req)
   >>> apiView()
   '{"name": "topic", "title": ""}'
 

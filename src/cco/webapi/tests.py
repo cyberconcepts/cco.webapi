@@ -17,6 +17,7 @@ from loops.setup import importData as baseImportData
 from loops.tests.setup import TestSite
 
 from cco.webapi.api import ApiTargetView, ApiContainerView, ApiTypeView
+from cco.webapi.api import ApiTraverser
 
 
 def setUp(self):
@@ -35,6 +36,14 @@ def setUp(self):
 
 def tearDown(self):
     placefulTearDown()
+
+
+def traverse(root, request, path):
+    obj = root
+    for name in path.split('/'):
+        trav = ApiTraverser(obj, request)
+        obj = trav.publishTraverse(request, name)
+    return obj
 
 
 class Test(unittest.TestCase):
