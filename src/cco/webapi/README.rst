@@ -11,7 +11,7 @@ Let's first do some common imports and initializations.
   >>> log = getLogger('cco.webapi')
 
   >>> from cco.webapi.node import ApiNode
-  >>> from cco.webapi.tests import traverse
+  >>> from cco.webapi.tests import callPath, traverse
 
   >>> from loops.setup import addAndConfigureObject, addObject
   >>> from loops.concept import Concept
@@ -37,49 +37,39 @@ We start with calling the API view of the top-level (root) API node.
   >>> apiView()
   '[{"name": "topics"}]'
 
+The tests module contains a shortcout for traversing a path and calling
+the corresponding view.
+
+  >>> callPath(apiRoot)
+  '[{"name": "topics"}]'
+
 What happens upon traversing a node?
 
-  >>> req = TestRequest()
-  >>> obj = traverse(apiRoot, req, 'topics')
-  >>> obj is node_topics
-  True
-
-  >>> apiView = ApiView(obj, req)
-  >>> apiView()
+  >>> callPath(apiRoot, 'topics')
   '[]'
 
-  >>> req = TestRequest()
-  >>> obj = traverse(apiRoot, req, 'topics/loops')
+When a node does not exist we get a 'NotFound' exception.
+
+  >>> callPath(apiRoot, 'topics/loops')
   Traceback (most recent call last):
   ...
   NotFound: ... name: 'loops'
 
-Maybe we should assign a target: we use the topic type and
-create a 'loops' topic.
+Maybe we should assign a target: we use the topic type as target 
+and create a 'loops' topic.
 
   >>> node_topics.target = type_topic
   >>> topic_loops = addAndConfigureObject(concepts, Concept, 'loops',
   ...     conceptType=type_topic)
 
-The view now shows a list of the target object's children.
+We now get a list of the target object's children.
 
-  >>> apiView = ApiView(node_topics, req)
-  >>> apiView()
+  >>> callPath(apiRoot, 'topics')
   '[{"name": "loops", "title": ""}]'
 
-Now we can also traverse the target object. The traverser still returns
-the node, but the traversed object is remembered in the request so that 
-the view can deliver the correct data.
+We can also directly access the target's children using their name.
 
-  >>> req = TestRequest()
-  >>> obj = traverse(apiRoot, req, 'topics/loops')
-  *** NodeView: traversing loops
-  *** ContainerView: traversing loops
-  >>> obj is node_topics
-  True
-
-  >>> apiView = ApiView(obj, req)
-  >>> apiView()
+  >>> callPath(apiRoot, 'topics/loops')
   '{"name": "loops", "title": ""}'
 
 We can also use the type hierarchy as starting point of our 
@@ -88,38 +78,13 @@ journey.
   >>> node_types = addAndConfigureObject(apiRoot, ApiNode, 'types')
   >>> node_types.target = type_type
 
-  >>> req = TestRequest()
-  >>> obj = traverse(apiRoot, req, 'types')
-  >>> obj is node_types
-  True
-
-  >>> apiView = ApiView(obj, req)
-  >>> apiView()
+  >>> callPath(apiRoot, 'types')
   '[{"name": "topic", "title": ""}, ... {"name": "type", "title": "Type"}]'
 
-  >>> req = TestRequest()
-  >>> obj = traverse(apiRoot, req, 'types/topic')
-  *** NodeView: traversing topic
-  *** ContainerView: traversing topic
-  >>> obj is node_types
-  True
-
-  >>> apiView = ApiView(obj, req)
-  >>> apiView()
+  >>> callPath(apiRoot, 'types/topic')
   '{"name": "topic", "title": ""}'
 
-  >>> req = TestRequest()
-  >>> obj = traverse(apiRoot, req, 'types/topic/loops')
-  *** NodeView: traversing topic
-  *** ContainerView: traversing topic
-  *** NodeView: traversing loops
-  *** TargetView: traversing loops
-  *** ContainerView: traversing loops
-  >>> obj is node_types
-  True
-
-  >>> apiView = ApiView(obj, req)
-  >>> apiView()
+  >>> callPath(apiRoot, 'types/topic/loops')
   '{"name": "loops", "title": ""}'
 
 Next steps (?)

@@ -53,15 +53,14 @@ class ApiView(NodeView):
         return [dict(name=getName(n)) for n in self.context.values()]
 
     def get(self, name):
-        print '*** NodeView: traversing', name
+        #print '*** NodeView: traversing', name
         targetView = self.viewAnnotations.get('targetView')
         if targetView is not None:
-            target = targetView.context
-            targetView = targetView.getView(name)
-            if targetView is None:
-                cv = self.getContainerView(target)
-                if cv is not None:
-                    targetView = cv.getView(name)
+            cv = self.getContainerView(targetView.context)
+            if cv is None:
+                targetView = None
+            else:
+                targetView = cv.getView(name)
         else:
             target = self.context.target
             if target is None:
@@ -105,16 +104,6 @@ class ApiTargetView(ConceptView):
         # TODO: use self.adapted and typeInterface to get all properties
         return dict(name=getName(obj), title=obj.title)
 
-    def getView(self, name):
-        print '*** TargetView: traversing', name
-        # TODO: check for special attributes
-        value = getattr(self.adapted, name, None)
-        if value is None:
-            return None
-        targetView = component.getMultiAdapter(
-                (adapted(value), self.request), name='api_target')
-        return targetView
-
 
 class ApiContainerView(ConceptView):
 
@@ -129,15 +118,14 @@ class ApiContainerView(ConceptView):
         return [dict(name=getName(obj), title=obj.title) for obj in lst]
 
     def getView(self, name):
-        print '*** ContainerView: traversing', name
+        #print '*** ContainerView: traversing', name
         # TODO: check for special attributes
         # TODO: retrieve object from list of children
         obj = self.getObject(name)
         if obj is None:
             return None
-        targetView = component.getMultiAdapter(
+        return component.getMultiAdapter(
                 (adapted(obj), self.request), name='api_target')
-        return targetView
 
 
 class ApiTypeView(ApiContainerView):
