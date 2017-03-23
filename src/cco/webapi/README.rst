@@ -82,17 +82,27 @@ journey.
   '[{"name": "topic", "title": ""}, ... {"name": "type", "title": "Type"}]'
 
   >>> callPath(apiRoot, 'types/topic')
-  '{"name": "topic", "title": ""}'
+  '[{"name": "loops", "title": ""}]'
 
   >>> callPath(apiRoot, 'types/topic/loops')
   '{"name": "loops", "title": ""}'
 
-Next steps (?)
-- traverse properties of target 'topic' (?)
-- traverse special attributes/methods (children()) of target topic
+Next steps
+- return properties of target object as given by interface/schema
+- traverse special attributes/methods (e.g. _children) of target topic
 
 Creating new objects with POST
 ------------------------------
+
+  >>> input = '{"name": "rdf", "title": "RDF"}'
+  >>> callPath(apiRoot, 'types/topic', 'POST', input=input)
+  'Done'
+
+  >>> callPath(apiRoot, 'types/topic')
+  '[{"name": "loops", "title": ""}, {"name": "rdf", "title": "RDF"}]'
+
+  >>> callPath(apiRoot, 'types/topic/rdf')
+  '{"name": "rdf", "title": "RDF"}'
 
 Updating objects with PUT
 -------------------------

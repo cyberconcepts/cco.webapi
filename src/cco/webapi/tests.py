@@ -4,6 +4,7 @@
 Tests for the 'cco.webapi' package.
 """
 
+import io
 import os
 import unittest, doctest
 from zope.app.testing.setup import placefulSetUp, placefulTearDown
@@ -31,6 +32,8 @@ def setUp(self):
     component.provideAdapter(ApiContainerView, 
         (IConceptSchema, IBrowserRequest), Interface, name='api_container')
     component.provideAdapter(ApiTypeView, 
+        (ITypeConcept, IBrowserRequest), Interface, name='api_target')
+    component.provideAdapter(ApiTypeView, 
         (ITypeConcept, IBrowserRequest), Interface, name='api_container')
 
 
@@ -45,8 +48,10 @@ def traverse(root, request, path):
         obj = trav.publishTraverse(request, name)
     return obj
 
-def callPath(obj, path='', method='GET', params={}):
-    request = TestRequest(method=method, form=params)
+def callPath(obj, path='', method='GET', params={}, input=''):
+    env = dict(REQUEST_METHOD=method)
+    request = TestRequest(
+                body_instream=io.BytesIO(input), environ=env, form=params)
     if path:
         obj = traverse(obj, request, path)
     view = ApiView(obj, request)

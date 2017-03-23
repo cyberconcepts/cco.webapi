@@ -20,7 +20,7 @@
 View-like implementations for access to the REST API.
 """
 
-from json import dumps
+from json import dumps, loads
 from zope.app.container.traversal import ItemTraverser
 from zope import component
 from zope.traversing.api import getName
@@ -28,6 +28,8 @@ from zope.traversing.api import getName
 from loops.browser.concept import ConceptView
 from loops.browser.node import NodeView
 from loops.common import adapted
+from loops.concept import Concept
+from loops.setup import addAndConfigureObject
 
 
 # provide lower-level (RDF-like) API for accessing the concept map
@@ -46,7 +48,9 @@ class ApiView(NodeView):
         if target is not None:
             targetView = self.getContainerView(adapted(target))
             return targetView()
-        # TODO: check for request.method
+        # TODO: check for request.method?
+        if self.request.method == 'POST':
+            return 'Not allowed on node'
         return dumps(self.getData())
 
     def getData(self):
@@ -65,8 +69,8 @@ class ApiView(NodeView):
             target = self.context.target
             if target is None:
                 return None
-            container = self.getContainerView(adapted(target))
-            targetView = container.getView(name)
+            cv = self.getContainerView(target)
+            targetView = cv.getView(name)
         if targetView is None:
             return None
         self.viewAnnotations['targetView'] = targetView
@@ -93,11 +97,27 @@ class ApiTraverser(ItemTraverser):
 
 # target / concept views
 
-class ApiTargetView(ConceptView):
+class ApiTargetBase(ConceptView):
 
     def __call__(self, *args, **kw):
         # TODO: check for request.method
+        if self.request.method == 'POST':
+            return self.create()
         return dumps(self.getData())
+
+    def create(self):
+        return 'Not allowed'
+
+    def getPostData(self):
+        instream = self.request._body_instream
+        if instream is not None:
+            json = instream.read()
+            if json:
+                return loads(json)
+        return None
+
+
+class ApiTargetView(ApiTargetBase):
 
     def getData(self):
         obj = self.context
@@ -105,11 +125,7 @@ class ApiTargetView(ConceptView):
         return dict(name=getName(obj), title=obj.title)
 
 
-class ApiContainerView(ConceptView):
-
-    def __call__(self, *args, **kw):
-        # TODO: check for request.method
-        return dumps(self.getData())
+class ApiContainerView(ApiTargetBase):
 
     def getData(self):
         # TODO: check for real listing method and parameters
@@ -124,8 +140,9 @@ class ApiContainerView(ConceptView):
         obj = self.getObject(name)
         if obj is None:
             return None
-        return component.getMultiAdapter(
+        view = component.getMultiAdapter(
                 (adapted(obj), self.request), name='api_target')
+        return view
 
 
 class ApiTypeView(ApiContainerView):
@@ -135,4 +152,18 @@ class ApiTypeView(ApiContainerView):
         cname = tp.conceptManager or 'concepts'
         prefix = tp.namePrefix or ''
         return self.loopsRoot[cname].get(prefix + name)
+
+    def create(self):
+        data = self.getPostData()
+        if not data:
+            return 'missing data'
+        #print '***', data
+        tp = self.adapted
+        cname = tp.conceptManager or 'concepts'
+        container = self.loopsRoot[cname]
+        prefix = tp.namePrefix or ''
+        addAndConfigureObject(container, Concept, prefix + data['name'], 
+                title=data.get('title') or '',
+                conceptType=self.context)
+        return 'Done'
 
