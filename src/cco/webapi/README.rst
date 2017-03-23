@@ -107,4 +107,14 @@ Creating new objects with POST
 Updating objects with PUT
 -------------------------
 
+  >>> input = '{"title": "loops"}'
+  >>> callPath(apiRoot, 'types/topic/loops', 'PUT', input=input)
+  'Done'
+
+  >>> callPath(apiRoot, 'types/topic')
+  '[{"name": "loops", "title": "loops"}, {"name": "rdf", "title": "RDF"}]'
+
+  >>> callPath(apiRoot, 'types/topic/loops')
+  '{"name": "loops", "title": "loops"}'
+
 Create relationships (links) between objects - assign a child.
