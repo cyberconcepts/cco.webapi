@@ -103,10 +103,20 @@ class ApiTargetBase(ConceptView):
         # TODO: check for request.method
         if self.request.method == 'POST':
             return self.create()
+        if self.request.method == 'PUT':
+            return self.update()
         return dumps(self.getData())
 
     def create(self):
         return 'Not allowed'
+
+    def update(self):
+        data = self.getPostData()
+        if not data:
+            return 'missing data'
+        for k, v in data.items():
+            setattr(self.adapted, k, v)
+        return 'Done'
 
     def getPostData(self):
         instream = self.request._body_instream
