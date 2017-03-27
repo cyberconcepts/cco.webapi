@@ -17,7 +17,7 @@
 #
 
 """
-View-like implementations for access to the REST API.
+View-like implementations for the REST API.
 """
 
 from json import dumps, loads
@@ -32,7 +32,7 @@ from loops.concept import Concept
 from loops.setup import addAndConfigureObject
 
 
-# provide lower-level (RDF-like) API for accessing the concept map
+# TODO: provide lower-level (RDF-like?) API for accessing the concept map
 # in a simple and generic way. 
 # next steps: RDF-like API for resources and tracks
 
@@ -156,6 +156,10 @@ class ApiContainerView(ApiTargetBase):
 
 
 class ApiTypeView(ApiContainerView):
+
+    def getData(self):
+        lst = self.context.getChildren([self.typePredicate])
+        return [dict(name=getName(obj), title=obj.title) for obj in lst]
 
     def getObject(self, name):
         tp = self.adapted
