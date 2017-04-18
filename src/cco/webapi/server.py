@@ -37,7 +37,7 @@ from loops.setup import addAndConfigureObject
 # next steps: RDF-like API for resources and tracks
 
 
-class ApiView(NodeView):
+class ApiHandler(NodeView):
 
     def __call__(self, *args, **kw):
         self.request.response.setHeader('content-type', 'application/json')
@@ -86,7 +86,7 @@ class ApiTraverser(ItemTraverser):
 
     def publishTraverse(self, request, name):
         if self.context.get(name) is None:
-            obj = ApiView(self.context, request).get(name)
+            obj = ApiHandler(self.context, request).get(name)
             if obj is not None:
                 return obj
         return self.defaultTraverse(request, name)        
@@ -97,7 +97,7 @@ class ApiTraverser(ItemTraverser):
 
 # target / concept views
 
-class ApiTargetBase(ConceptView):
+class TargetBase(ConceptView):
 
     def __call__(self, *args, **kw):
         # TODO: check for request.method
@@ -127,7 +127,7 @@ class ApiTargetBase(ConceptView):
         return None
 
 
-class ApiTargetView(ApiTargetBase):
+class TargetHandler(TargetBase):
 
     def getData(self):
         obj = self.context
@@ -135,7 +135,7 @@ class ApiTargetView(ApiTargetBase):
         return dict(name=getName(obj), title=obj.title)
 
 
-class ApiContainerView(ApiTargetBase):
+class ContainerHandler(TargetBase):
 
     def getData(self):
         # TODO: check for real listing method and parameters
@@ -144,7 +144,7 @@ class ApiContainerView(ApiTargetBase):
         return [dict(name=getName(obj), title=obj.title) for obj in lst]
 
     def getView(self, name):
-        #print '*** ContainerView: traversing', name
+        #print '*** ContainerHandler: traversing', name
         # TODO: check for special attributes
         # TODO: retrieve object from list of children
         obj = self.getObject(name)
@@ -155,7 +155,7 @@ class ApiContainerView(ApiTargetBase):
         return view
 
 
-class ApiTypeView(ApiContainerView):
+class TypeHandler(ContainerHandler):
 
     def getData(self):
         lst = self.context.getChildren([self.typePredicate])

@@ -17,8 +17,8 @@ from loops.interfaces import IConceptSchema, ITypeConcept
 from loops.setup import importData as baseImportData
 from loops.tests.setup import TestSite
 
-from cco.webapi.api import ApiTargetView, ApiContainerView, ApiTypeView
-from cco.webapi.api import ApiView, ApiTraverser
+from cco.webapi.server import ApiHandler, ApiTraverser
+from cco.webapi.server import TargetHandler, ContainerHandler, TypeHandler
 
 
 def setUp(self):
@@ -27,13 +27,13 @@ def setUp(self):
     concepts, resources, views = t.setup()
     loopsRoot = site['loops']
     self.globs['loopsRoot'] = loopsRoot
-    component.provideAdapter(ApiTargetView, 
+    component.provideAdapter(TargetHandler, 
         (IConceptSchema, IBrowserRequest), Interface, name='api_target')
-    component.provideAdapter(ApiContainerView, 
+    component.provideAdapter(ContainerHandler, 
         (IConceptSchema, IBrowserRequest), Interface, name='api_container')
-    component.provideAdapter(ApiTypeView, 
+    component.provideAdapter(TypeHandler, 
         (ITypeConcept, IBrowserRequest), Interface, name='api_target')
-    component.provideAdapter(ApiTypeView, 
+    component.provideAdapter(TypeHandler, 
         (ITypeConcept, IBrowserRequest), Interface, name='api_container')
 
 
@@ -54,7 +54,7 @@ def callPath(obj, path='', method='GET', params={}, input=''):
                 body_instream=io.BytesIO(input), environ=env, form=params)
     if path:
         obj = traverse(obj, request, path)
-    view = ApiView(obj, request)
+    view = ApiHandler(obj, request)
     return view()
 
 

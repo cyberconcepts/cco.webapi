@@ -32,9 +32,9 @@ Querying the database with the GET method
 
 We start with calling the API view of the top-level (root) API node.
 
-  >>> from cco.webapi.api import ApiView
-  >>> apiView = ApiView(apiRoot, TestRequest())
-  >>> apiView()
+  >>> from cco.webapi.server import ApiHandler
+  >>> handler = ApiHandler(apiRoot, TestRequest())
+  >>> handler()
   '[{"name": "topics"}]'
 
 The tests module contains a shortcout for traversing a path and calling

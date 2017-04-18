@@ -51,7 +51,7 @@
 
   <!-- API traverser and views -->
 
-  <zope:view factory="cco.webapi.api.ApiTraverser"
+  <zope:view factory="cco.webapi.server.ApiTraverser"
       for="cco.webapi.interfaces.IApiNode"
       type="zope.publisher.interfaces.http.IHTTPRequest"
       provides="zope.publisher.interfaces.browser.IBrowserPublisher"
@@ -61,31 +61,31 @@
   <browser:page
       name="index.html"
       for="cco.webapi.interfaces.IApiNode"
-      class="cco.webapi.api.ApiView"
+      class="cco.webapi.server.ApiHandler"
       permission="zope.View" />
 
   <browser:page
       name="api_target"
       for="loops.interfaces.IConceptSchema"
-      class="cco.webapi.api.ApiTargetView"
+      class="cco.webapi.server.TargetHandler"
       permission="zope.View" />
 
   <browser:page
       name="api_container"
       for="loops.interfaces.IConceptSchema"
-      class="cco.webapi.api.ApiContainerView"
+      class="cco.webapi.server.ContainerHandler"
       permission="zope.View" />
 
   <browser:page
       name="api_target"
       for="loops.interfaces.ITypeConcept"
-      class="cco.webapi.api.ApiTypeView"
+      class="cco.webapi.server.TypeHandler"
       permission="zope.View" />
 
   <browser:page
       name="api_container"
       for="loops.interfaces.ITypeConcept"
-      class="cco.webapi.api.ApiTypeView"
+      class="cco.webapi.server.TypeHandler"
       permission="zope.View" />
 
 </configure>
