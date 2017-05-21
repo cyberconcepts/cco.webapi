@@ -3,6 +3,26 @@
    xmlns:browser="http://namespaces.zope.org/browser"
    i18n_domain="cco.webapi">  
 
+  <!-- security -->
+
+  <zope:permission
+      id="cco.webapi.Get"
+      title="[cco-webapi-get-permission] cco.webapi: GET" />
+
+  <zope:permission
+      id="cco.webapi.Post"
+      title="[cco-webapi-post-permission] cco.webapi: POST" />
+
+  <zope:permission
+      id="cco.webapi.Put"
+      title="[cco-webapi-put-permission] cco.webapi: PUT" />
+
+  <zope:role id="cco.webapi.All"
+        title="[cco-webapi-all-role] cco.webapi: All" />
+  <zope:grant role="cco.webapi.All" permission="cco.webapi.Get" />
+  <zope:grant role="cco.webapi.All" permission="cco.webapi.Post" />
+  <zope:grant role="cco.webapi.All" permission="cco.webapi.Put" />
+
   <!-- node classes -->
 
   <zope:class class="cco.webapi.node.ApiNode">
@@ -62,7 +82,7 @@
       name="index.html"
       for="cco.webapi.interfaces.IApiNode"
       class="cco.webapi.server.ApiHandler"
-      permission="zope.View" />
+      permission="cco.webapi.Get" />
 
   <browser:page
       name="api_target"
