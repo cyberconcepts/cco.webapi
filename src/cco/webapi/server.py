@@ -27,7 +27,7 @@ from zope.traversing.api import getName
 
 from loops.browser.concept import ConceptView
 from loops.browser.node import NodeView
-from loops.common import adapted
+from loops.common import adapted, baseObject
 from loops.concept import Concept
 from loops.setup import addAndConfigureObject
 
@@ -99,6 +99,10 @@ class ApiTraverser(ItemTraverser):
 
 class TargetBase(ConceptView):
 
+    # TODO: use schema for conversion of field data
+    #       (1) marshal / toJson
+    #       (2) unmarshal / fromJson
+
     def __call__(self, *args, **kw):
         # TODO: check for request.method
         if self.request.method == 'POST':
@@ -154,6 +158,19 @@ class ContainerHandler(TargetBase):
                 (adapted(obj), self.request), name='api_target')
         return view
 
+    def createObject(self, tp):
+        data = self.getPostData()
+        if not data:
+            return 'missing data'
+        #print '***', data
+        cname = tp.conceptManager or 'concepts'
+        container = self.loopsRoot[cname]
+        prefix = tp.namePrefix or ''
+        obj = addAndConfigureObject(container, Concept, prefix + data['name'], 
+                title=data.get('title') or '',
+                conceptType=baseObject(tp))
+        return adapted(obj)
+
 
 class TypeHandler(ContainerHandler):
 
@@ -168,16 +185,5 @@ class TypeHandler(ContainerHandler):
         return self.loopsRoot[cname].get(prefix + name)
 
     def create(self):
-        data = self.getPostData()
-        if not data:
-            return 'missing data'
-        #print '***', data
-        tp = self.adapted
-        cname = tp.conceptManager or 'concepts'
-        container = self.loopsRoot[cname]
-        prefix = tp.namePrefix or ''
-        addAndConfigureObject(container, Concept, prefix + data['name'], 
-                title=data.get('title') or '',
-                conceptType=self.context)
+        obj = self.createObject(self.adapted)
         return 'Done'
-
