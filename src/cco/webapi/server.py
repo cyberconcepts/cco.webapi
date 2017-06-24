@@ -32,13 +32,23 @@ from loops.common import adapted, baseObject
 from loops.concept import Concept
 from loops.setup import addAndConfigureObject
 
-
-# TODO: provide lower-level (RDF-like?) API for accessing the concept map
+# provide lower-level (RDF-like?) API for accessing the concept map
 # in a simple and generic way. 
 # next steps: RDF-like API for resources and tracks
 
 
-class ApiHandler(NodeView):
+logger = getLogger('cco.webapi.server')
+
+
+class ApiCommon(object):
+
+    def error(self, message, status=500):
+        logger.error(message)
+        self.request.response.status = status
+        return dict(message=message)
+
+
+class ApiHandler(ApiCommon, NodeView):
 
     def __call__(self, *args, **kw):
         self.request.response.setHeader('content-type', 'application/json')
@@ -51,8 +61,7 @@ class ApiHandler(NodeView):
             return targetView()
         # TODO: check for request.method?
         if self.request.method == 'POST':
-            # error
-            return 'Not allowed on node'
+            return self.error('POST not allowed on node')
         return dumps(self.getData())
 
     def getData(self):
@@ -99,7 +108,7 @@ class ApiTraverser(ItemTraverser):
 
 # target / concept views
 
-class TargetBase(ConceptView):
+class TargetBase(ApiCommon, ConceptView):
 
     # TODO: use schema for conversion of field data
     #       (1) marshal / toJson
@@ -132,7 +141,8 @@ class TargetBase(ConceptView):
     def getPostData(self):
         instream = self.request._body_instream
         if instream is not None:
-            json = instream.read()
+            stream = instream.getCacheStream()
+            json = stream.read()
             if json:
                 return loads(json)
         return None
@@ -167,7 +177,7 @@ class ContainerHandler(TargetBase):
         return view
 
     def createObject(self, tp):
-        data = self.getPostData()
+        data = self.getInputData()
         if not data:
             # error
             return 'missing data'
