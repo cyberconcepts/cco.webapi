@@ -20,6 +20,7 @@
 View-like implementations for the REST API.
 """
 
+from logging import getLogger
 from json import dumps, loads
 from zope.app.container.traversal import ItemTraverser
 from zope import component
@@ -46,10 +47,11 @@ class ApiHandler(NodeView):
             return targetView()
         target = self.context.target
         if target is not None:
-            targetView = self.getContainerView(adapted(target))
+            targetView = self.getContainerView(target)
             return targetView()
         # TODO: check for request.method?
         if self.request.method == 'POST':
+            # error
             return 'Not allowed on node'
         return dumps(self.getData())
 
@@ -112,15 +114,20 @@ class TargetBase(ConceptView):
         return dumps(self.getData())
 
     def create(self):
+        # error
         return 'Not allowed'
 
     def update(self):
-        data = self.getPostData()
+        data = self.getInputData()
         if not data:
+            # error
             return 'missing data'
         for k, v in data.items():
             setattr(self.adapted, k, v)
         return 'Done'
+
+    def getInputData(self):
+        return self.getPostData()
 
     def getPostData(self):
         instream = self.request._body_instream
@@ -151,6 +158,7 @@ class ContainerHandler(TargetBase):
         #print '*** ContainerHandler: traversing', name
         # TODO: check for special attributes
         # TODO: retrieve object from list of children
+        #obj = self.
         obj = self.getObject(name)
         if obj is None:
             return None
@@ -161,6 +169,7 @@ class ContainerHandler(TargetBase):
     def createObject(self, tp):
         data = self.getPostData()
         if not data:
+            # error
             return 'missing data'
         #print '***', data
         cname = tp.conceptManager or 'concepts'

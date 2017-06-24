@@ -20,6 +20,8 @@ Let's first do some common imports and initializations.
   >>> type_type = concepts['type']
   >>> type_topic = addAndConfigureObject(concepts, Concept, 'topic',
   ...     conceptType=type_type)
+  >>> type_task = addAndConfigureObject(concepts, Concept, 'task',
+  ...     conceptType=type_type)
   >>> home = loopsRoot['views']['home']
 
 We now create the first basic objects.
@@ -103,6 +105,13 @@ Creating new objects with POST
 
   >>> callPath(apiRoot, 'types/topic/rdf')
   '{"name": "rdf", "title": "RDF"}'
+
+  >>> input = '{"name": "task0001", "title": "Document loops WebAPI"}'
+  >>> callPath(apiRoot, 'types/task', 'POST', input=input)
+  'Done'
+
+  >>> callPath(apiRoot, 'types/task')
+  '[{"name": "task0001", "title": "Document loops WebAPI"}]'
 
 Updating objects with PUT
 -------------------------
