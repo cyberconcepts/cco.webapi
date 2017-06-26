@@ -84,6 +84,14 @@
       class="cco.webapi.server.ApiHandler"
       permission="cco.webapi.Get" />
 
+  <zope:adapter
+      name="PUT"
+      for="cco.webapi.interfaces.IApiNode
+           zope.publisher.interfaces.http.IHTTPRequest"
+      provides="zope.interface.Interface"
+      factory="cco.webapi.server.ApiHandler"
+      permission="cco.webapi.Get" />
+
   <browser:page
       name="api_target"
       for="loops.interfaces.IConceptSchema"

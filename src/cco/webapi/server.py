@@ -64,6 +64,8 @@ class ApiHandler(ApiCommon, NodeView):
             return self.error('POST not allowed on node')
         return dumps(self.getData())
 
+    PUT = __call__
+
     def getData(self):
         return [dict(name=getName(n)) for n in self.context.values()]
 
@@ -89,6 +91,7 @@ class ApiHandler(ApiCommon, NodeView):
 
     def getContainerView(self, target):
         viewName = self.context.viewName or 'api_container'
+        #import pdb; pdb.set_trace()
         return component.getMultiAdapter(
                     (adapted(target), self.request), name=viewName)
 
@@ -115,7 +118,6 @@ class TargetBase(ApiCommon, ConceptView):
     #       (2) unmarshal / fromJson
 
     def __call__(self, *args, **kw):
-        # TODO: check for request.method
         if self.request.method == 'POST':
             return self.create()
         if self.request.method == 'PUT':

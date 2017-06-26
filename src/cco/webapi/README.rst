@@ -117,13 +117,13 @@ Updating objects with PUT
 -------------------------
 
   >>> input = '{"title": "loops"}'
-  >>> callPath(apiRoot, 'types/topic/loops', 'PUT', input=input)
+  >>> callPath(apiRoot, 'topics/loops', 'PUT', input=input)
   'Done'
 
-  >>> callPath(apiRoot, 'types/topic')
+  >>> callPath(apiRoot, 'topics')
   '[{"name": "loops", "title": "loops"}, {"name": "rdf", "title": "RDF"}]'
 
-  >>> callPath(apiRoot, 'types/topic/loops')
+  >>> callPath(apiRoot, 'topics/loops')
   '{"name": "loops", "title": "loops"}'
 
 Create relationships (links) between objects - assign a child.
