@@ -71,11 +71,11 @@
 
   <!-- API traverser and views -->
 
-  <zope:view factory="cco.webapi.server.ApiTraverser"
-      for="cco.webapi.interfaces.IApiNode"
-      type="zope.publisher.interfaces.http.IHTTPRequest"
+  <zope:adapter
+      for="cco.webapi.interfaces.IApiNode
+           zope.publisher.interfaces.http.IHTTPRequest"
       provides="zope.publisher.interfaces.browser.IBrowserPublisher"
-      allowed_interface="zope.publisher.interfaces.browser.IBrowserPublisher"
+      factory="cco.webapi.server.ApiTraverser"
       permission="zope.Public" />
 
   <browser:page
@@ -90,30 +90,38 @@
            zope.publisher.interfaces.http.IHTTPRequest"
       provides="zope.interface.Interface"
       factory="cco.webapi.server.ApiHandler"
+      permission="cco.webapi.Put" />
+
+  <zope:adapter
+      name="api_target"
+      for="loops.interfaces.IConceptSchema
+           zope.publisher.interfaces.http.IHTTPRequest"
+      provides="zope.interface.Interface"
+      factory="cco.webapi.server.TargetHandler"
       permission="cco.webapi.Get" />
 
-  <browser:page
-      name="api_target"
-      for="loops.interfaces.IConceptSchema"
-      class="cco.webapi.server.TargetHandler"
-      permission="zope.View" />
-
-  <browser:page
+  <zope:adapter
       name="api_container"
-      for="loops.interfaces.IConceptSchema"
-      class="cco.webapi.server.ContainerHandler"
-      permission="zope.View" />
+      for="loops.interfaces.IConceptSchema
+           zope.publisher.interfaces.http.IHTTPRequest"
+      provides="zope.interface.Interface"
+      factory="cco.webapi.server.ContainerHandler"
+      permission="cco.webapi.Get" />
 
-  <browser:page
+  <zope:adapter
       name="api_target"
-      for="loops.interfaces.ITypeConcept"
-      class="cco.webapi.server.TypeHandler"
-      permission="zope.View" />
+      for="loops.interfaces.ITypeConcept
+           zope.publisher.interfaces.http.IHTTPRequest"
+      provides="zope.interface.Interface"
+      factory="cco.webapi.server.TypeHandler"
+      permission="cco.webapi.Get" />
 
-  <browser:page
+  <zope:adapter
       name="api_container"
-      for="loops.interfaces.ITypeConcept"
-      class="cco.webapi.server.TypeHandler"
-      permission="zope.View" />
+      for="loops.interfaces.ITypeConcept
+           zope.publisher.interfaces.http.IHTTPRequest"
+      provides="zope.interface.Interface"
+      factory="cco.webapi.server.TypeHandler"
+      permission="cco.webapi.Get" />
 
 </configure>
