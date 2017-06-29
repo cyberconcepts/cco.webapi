@@ -69,7 +69,7 @@
     <widget field="body" height="3" />
   </browser:editform>
 
-  <!-- API traverser and views -->
+  <!-- API traverser and views/handlers -->
 
   <zope:adapter
       for="cco.webapi.interfaces.IApiNode

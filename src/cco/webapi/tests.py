@@ -5,7 +5,9 @@ Tests for the 'cco.webapi' package.
 """
 
 import io
+import logging
 import os
+import sys
 import unittest, doctest
 from zope.app.testing.setup import placefulSetUp, placefulTearDown
 from zope import component
@@ -19,6 +21,17 @@ from loops.tests.setup import TestSite
 
 from cco.webapi.server import ApiHandler, ApiTraverser
 from cco.webapi.server import TargetHandler, ContainerHandler, TypeHandler
+
+
+class LogHandler(logging.StreamHandler):
+
+    def emit(self, record):
+        print('%s: %s' % (record.levelname, record.msg))
+
+logger = logging.getLogger('cco.webapi.server')
+#logger.setLevel(logging.DEBUG)
+logger.setLevel(logging.INFO)
+logger.addHandler(LogHandler())
 
 
 def setUp(self):

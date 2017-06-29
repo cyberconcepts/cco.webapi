@@ -20,7 +20,7 @@
 View-like implementations for the REST API.
 """
 
-from logging import getLogger
+import logging
 from json import dumps, loads
 from zope.app.container.traversal import ItemTraverser
 from zope import component
@@ -37,15 +37,25 @@ from loops.setup import addAndConfigureObject
 # next steps: RDF-like API for resources and tracks
 
 
-logger = getLogger('cco.webapi.server')
+logger = logging.getLogger('cco.webapi.server')
+logger.setLevel(logging.INFO)
 
 
 class ApiCommon(object):
 
+    logger = logger
+
+    def logInfo(self, message=None):
+        self.logger.info(message)
+
+    def success(self, message='Done'):
+        self.logger.debug(message)
+        return dumps(dict(message=message))
+
     def error(self, message, status=500):
-        logger.error(message)
-        self.request.response.status = status
-        return dict(message=message)
+        self.logger.error(message)
+        self.request.response.setStatus(status, message)
+        return dumps(dict(message=message, status=status))
 
 
 class ApiHandler(ApiCommon, NodeView):
@@ -91,7 +101,6 @@ class ApiHandler(ApiCommon, NodeView):
 
     def getContainerView(self, target):
         viewName = self.context.viewName or 'api_container'
-        #import pdb; pdb.set_trace()
         return component.getMultiAdapter(
                     (adapted(target), self.request), name=viewName)
 
@@ -126,25 +135,26 @@ class TargetBase(ApiCommon, ConceptView):
 
     def create(self):
         # error
-        return 'Not allowed'
+        return self.error('Not allowed')
 
     def update(self):
         data = self.getInputData()
         if not data:
-            # error
-            return 'missing data'
+            return self.error('missing data')
         for k, v in data.items():
             setattr(self.adapted, k, v)
-        return 'Done'
+        return self.success()
 
     def getInputData(self):
-        return self.getPostData()
+        data = self.getPostData()
+        self.logInfo('Input Data: ' + repr(data))
+        return data
 
     def getPostData(self):
-        instream = self.request._body_instream
-        if instream is not None:
-            stream = instream.getCacheStream()
-            json = stream.read()
+        stream = self.request.bodyStream
+        if stream is not None:
+            json = stream.read(None)
+            self.logInfo('POST Data: ' + repr(json))
             if json:
                 return loads(json)
         return None
@@ -170,7 +180,6 @@ class ContainerHandler(TargetBase):
         #print '*** ContainerHandler: traversing', name
         # TODO: check for special attributes
         # TODO: retrieve object from list of children
-        #obj = self.
         obj = self.getObject(name)
         if obj is None:
             return None
@@ -178,12 +187,15 @@ class ContainerHandler(TargetBase):
                 (adapted(obj), self.request), name='api_target')
         return view
 
+    def getObject(self, name):
+        self.error('getObject: To be implemented by subclass')
+        return None
+
     def createObject(self, tp):
         data = self.getInputData()
         if not data:
-            # error
-            return 'missing data'
-        #print '***', data
+            self.error('missing data')
+            return None
         cname = tp.conceptManager or 'concepts'
         container = self.loopsRoot[cname]
         prefix = tp.namePrefix or ''
@@ -200,6 +212,7 @@ class TypeHandler(ContainerHandler):
         return [dict(name=getName(obj), title=obj.title) for obj in lst]
 
     def getObject(self, name):
+        # TODO: use catalog query
         tp = self.adapted
         cname = tp.conceptManager or 'concepts'
         prefix = tp.namePrefix or ''
@@ -207,4 +220,4 @@ class TypeHandler(ContainerHandler):
 
     def create(self):
         obj = self.createObject(self.adapted)
-        return 'Done'
+        return self.success()
