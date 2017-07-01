@@ -137,7 +137,7 @@ Let's just see what happens if we do not supply input data.
   >>> callPath(apiRoot, 'topics/loops', 'PUT', input='{}')
   INFO: POST Data: '{}'
   INFO: Input Data: {}
-  ERROR: missing data
-  '{"status": 500, "message": "missing data"}'
+  ERROR: Missing data
+  '{"status": 500, "message": "Missing data"}'
 
 Create relationships (links) between objects - assign a child.

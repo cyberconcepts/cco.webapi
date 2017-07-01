@@ -38,15 +38,23 @@ from loops.setup import addAndConfigureObject
 
 
 logger = logging.getLogger('cco.webapi.server')
-logger.setLevel(logging.INFO)
+#logger.setLevel(logging.INFO)
+logger.setLevel(logging.DEBUG)
 
 
 class ApiCommon(object):
+    """ Common routines for logging, error handling, etc
+    """
+
+    # HTTP Status: see https://en.wikipedia.org/wiki/List_of_HTTP_status_codes
 
     logger = logger
 
     def logInfo(self, message=None):
         self.logger.info(message)
+
+    def logDebug(self, message=None):
+        self.logger.debug(message)
 
     def success(self, message='Done'):
         self.logger.debug(message)
@@ -61,6 +69,7 @@ class ApiCommon(object):
 class ApiHandler(ApiCommon, NodeView):
 
     def __call__(self, *args, **kw):
+        self.logDebug('Request Env: ' + str(self.request._environ))
         self.request.response.setHeader('content-type', 'application/json')
         targetView = self.viewAnnotations.get('targetView')
         if targetView is not None:
@@ -70,8 +79,8 @@ class ApiHandler(ApiCommon, NodeView):
             targetView = self.getContainerView(target)
             return targetView()
         # TODO: check for request.method?
-        if self.request.method == 'POST':
-            return self.error('POST not allowed on node')
+        if self.request.method in ('PUT', 'POST'):
+            return self.error('Method not allowed', 405)
         return dumps(self.getData())
 
     PUT = __call__
@@ -135,12 +144,12 @@ class TargetBase(ApiCommon, ConceptView):
 
     def create(self):
         # error
-        return self.error('Not allowed')
+        return self.error('Not allowed', 405)
 
     def update(self):
         data = self.getInputData()
         if not data:
-            return self.error('missing data')
+            return self.error('Missing data')
         for k, v in data.items():
             setattr(self.adapted, k, v)
         return self.success()
@@ -159,13 +168,20 @@ class TargetBase(ApiCommon, ConceptView):
                 return loads(json)
         return None
 
+    def getName(self, obj):
+        name = getName(obj)
+        prefix = adapted(obj.getType()).namePrefix
+        if prefix and name.startswith(prefix):
+            name = name[len(prefix):]
+        return name
+
 
 class TargetHandler(TargetBase):
 
     def getData(self):
         obj = self.context
         # TODO: use self.adapted and typeInterface to get all properties
-        return dict(name=getName(obj), title=obj.title)
+        return dict(name=self.getName(obj), title=obj.title)
 
 
 class ContainerHandler(TargetBase):
@@ -174,7 +190,7 @@ class ContainerHandler(TargetBase):
         # TODO: check for real listing method and parameters
         #       (or produce list in the caller and use it directly as context)
         lst = self.context.getChildren()
-        return [dict(name=getName(obj), title=obj.title) for obj in lst]
+        return [dict(name=self.getName(obj), title=obj.title) for obj in lst]
 
     def getView(self, name):
         #print '*** ContainerHandler: traversing', name
@@ -194,7 +210,7 @@ class ContainerHandler(TargetBase):
     def createObject(self, tp):
         data = self.getInputData()
         if not data:
-            self.error('missing data')
+            self.error('Missing data')
             return None
         cname = tp.conceptManager or 'concepts'
         container = self.loopsRoot[cname]
@@ -209,7 +225,7 @@ class TypeHandler(ContainerHandler):
 
     def getData(self):
         lst = self.context.getChildren([self.typePredicate])
-        return [dict(name=getName(obj), title=obj.title) for obj in lst]
+        return [dict(name=self.getName(obj), title=obj.title) for obj in lst]
 
     def getObject(self, name):
         # TODO: use catalog query
