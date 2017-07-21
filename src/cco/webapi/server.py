@@ -89,12 +89,12 @@ class ApiHandler(ApiCommon, NodeView):
         return [dict(name=getName(n)) for n in self.context.values()]
 
     def get(self, name):
-        #print '*** NodeView: traversing', name
+        #self.logInfo('*** NodeView: traversing ' + name)
         targetView = self.viewAnnotations.get('targetView')
         if targetView is not None:
-            cv = self.getContainerView(targetView.context)
+            cv = self.getContainerView(targetView.adapted)
             if cv is None:
-                targetView = None
+                targetView = targetView.getView(name)
             else:
                 targetView = cv.getView(name)
         else:
@@ -110,7 +110,7 @@ class ApiHandler(ApiCommon, NodeView):
 
     def getContainerView(self, target):
         viewName = self.context.viewName or 'api_container'
-        return component.getMultiAdapter(
+        return component.queryMultiAdapter(
                     (adapted(target), self.request), name=viewName)
 
 
@@ -121,7 +121,7 @@ class ApiTraverser(ItemTraverser):
             obj = ApiHandler(self.context, request).get(name)
             if obj is not None:
                 return obj
-        return self.defaultTraverse(request, name)        
+        return self.defaultTraverse(request, name)
 
     def defaultTraverse(self, request, name):
         return super(ApiTraverser, self).publishTraverse(request, name)
@@ -134,6 +134,8 @@ class TargetBase(ApiCommon, ConceptView):
     # TODO: use schema for conversion of field data
     #       (1) marshal / toJson
     #       (2) unmarshal / fromJson
+
+    routes = {}
 
     def __call__(self, *args, **kw):
         if self.request.method == 'POST':
@@ -178,6 +180,15 @@ class TargetBase(ApiCommon, ConceptView):
 
 class TargetHandler(TargetBase):
 
+    def getView(self, name):
+        cname = self.routes.get(name)
+        if cname is not None:
+            name = cname
+        view = component.getMultiAdapter(
+                (self.adapted, self.request), name=name)
+        return view
+
+
     def getData(self):
         obj = self.context
         # TODO: use self.adapted and typeInterface to get all properties
@@ -215,7 +226,10 @@ class ContainerHandler(TargetBase):
         cname = tp.conceptManager or 'concepts'
         container = self.loopsRoot[cname]
         prefix = tp.namePrefix or ''
-        obj = addAndConfigureObject(container, Concept, prefix + data['name'], 
+        name = data.get('name')
+        if name is None:
+            name = self.generateName(data)
+        obj = addAndConfigureObject(container, Concept, prefix + name, 
                 title=data.get('title') or '',
                 conceptType=baseObject(tp))
         return adapted(obj)
