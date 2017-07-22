@@ -56,9 +56,10 @@ class ApiCommon(object):
     def logDebug(self, message=None):
         self.logger.debug(message)
 
-    def success(self, message='Done'):
+    def success(self, message='Done', **kw):
+        kw.update(dict(message=message))
         self.logger.debug(message)
-        return dumps(dict(message=message))
+        return dumps(kw)
 
     def error(self, message, status=500):
         self.logger.error(message)
