@@ -144,6 +144,14 @@ class TargetBase(ApiCommon, ConceptView):
             return self.update()
         return dumps(self.getData())
 
+    def getName(self, obj):
+        obj = baseObject(obj)
+        name = getName(obj)
+        prefix = adapted(obj.getType()).namePrefix
+        if prefix and name.startswith(prefix):
+            name = name[len(prefix):]
+        return name
+
     def create(self):
         # error
         return self.error('Not allowed', 405)
@@ -170,13 +178,6 @@ class TargetBase(ApiCommon, ConceptView):
                 return loads(json)
         return None
 
-    def getName(self, obj):
-        name = getName(obj)
-        prefix = adapted(obj.getType()).namePrefix
-        if prefix and name.startswith(prefix):
-            name = name[len(prefix):]
-        return name
-
 
 class TargetHandler(TargetBase):
 
@@ -187,7 +188,6 @@ class TargetHandler(TargetBase):
         view = component.getMultiAdapter(
                 (self.adapted, self.request), name=name)
         return view
-
 
     def getData(self):
         obj = self.context
@@ -204,7 +204,7 @@ class ContainerHandler(TargetBase):
         return [dict(name=self.getName(obj), title=obj.title) for obj in lst]
 
     def getView(self, name):
-        #print '*** ContainerHandler: traversing', name
+        #print '*** ContainerHandler: traversing', name, self
         # TODO: check for special attributes
         # TODO: retrieve object from list of children
         obj = self.getObject(name)
