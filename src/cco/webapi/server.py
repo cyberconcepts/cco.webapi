@@ -219,8 +219,9 @@ class ContainerHandler(TargetBase):
         self.error('getObject: To be implemented by subclass')
         return None
 
-    def createObject(self, tp):
-        data = self.getInputData()
+    def createObject(self, tp, data=None):
+        if data is None:
+            data = self.getInputData()
         if not data:
             self.error('Missing data')
             return None
