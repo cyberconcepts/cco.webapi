@@ -23,6 +23,7 @@ View-like implementations for the REST API.
 import logging
 from json import dumps, loads
 from zope.app.container.traversal import ItemTraverser
+from zope.cachedescriptors.property import Lazy
 from zope import component
 from zope.traversing.api import getName
 
@@ -132,11 +133,13 @@ class ApiTraverser(ItemTraverser):
 
 class TargetBase(ApiCommon, ConceptView):
 
-    # TODO: use schema for conversion of field data
-    #       (1) marshal / toJson
-    #       (2) unmarshal / fromJson
-
     routes = {}
+
+    inputFieldMap = {}
+
+    @Lazy
+    def outputFieldMap(self):
+        return dict((v, k) for k, v in self.inputFieldMap.items())
 
     def __call__(self, *args, **kw):
         if self.request.method == 'POST':
@@ -167,6 +170,9 @@ class TargetBase(ApiCommon, ConceptView):
 
     def getInputData(self):
         data = self.getPostData()
+        if data:
+            self.mapInputFieldNames(data)
+            self.unmarshalValues(data)
         self.logInfo('Input Data: ' + repr(data))
         return data
 
@@ -178,6 +184,26 @@ class TargetBase(ApiCommon, ConceptView):
             if json:
                 return loads(json)
         return None
+
+    def mapInputFieldNames(self, data):
+        for k1 in data:
+            k2 = self.inputFieldMap.get(k1)
+            if k2 is not None:
+                data[k2] = data[k1]
+                del data[k1]
+
+    def mapOutputFieldNames(self, data):
+        for k1 in data:
+            k2 = self.outputFieldMap.get(k1)
+            if k2 is not None:
+                data[k2] = data[k1]
+                del data[k1]
+
+    def unmarshalValues(self, data):
+        pass
+
+    def marshalValues(self, data):
+        pass
 
 
 class TargetHandler(TargetBase):
@@ -192,8 +218,11 @@ class TargetHandler(TargetBase):
 
     def getData(self):
         obj = self.context
-        # TODO: use self.adapted and typeInterface to get all properties
-        return dict(name=self.getName(obj), title=obj.title)
+        # TODO: use schema (self.adapted and typeInterface) to get all properties
+        data = dict(name=self.getName(obj), title=obj.title)
+        self.marshalValues(data)
+        self.mapOutputFieldNames(data)
+        return data
 
 
 class ContainerHandler(TargetBase):
