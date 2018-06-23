@@ -26,7 +26,7 @@ setup(name='cco.webapi',
       zip_safe=False,
       install_requires=[
           'setuptools',
-          'requests',
+          #'requests',
           'loops',
           # -*- Extra requirements: -*-
       ],

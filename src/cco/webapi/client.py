@@ -21,7 +21,7 @@ Functions for accessing external services via a REST-JSON API.
 """
 
 import json
-import requests
+#import requests
 
 
 def sendJson(url, data, cred, method='POST'):
