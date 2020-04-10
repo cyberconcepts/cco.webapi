@@ -1,34 +1,40 @@
 #
-#  Copyright (c) 2018 Helmut Merz helmutm@cy55.de
-#
-#  This program is free software; you can redistribute it and/or modify
-#  it under the terms of the GNU General Public License as published by
-#  the Free Software Foundation; either version 2 of the License, or
-#  (at your option) any later version.
-#
-#  This program is distributed in the hope that it will be useful,
-#  but WITHOUT ANY WARRANTY; without even the implied warranty of
-#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#  GNU General Public License for more details.
-#
-#  You should have received a copy of the GNU General Public License
-#  along with this program; if not, write to the Free Software
-#  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+# cco.webapi.client
 #
 
 """
-Functions for accessing external services via a REST-JSON API.
+Functions for providieng external services with object data 
+via a REST-JSON API.
 """
 
 import json
-#import requests
+from logging import getLogger
+import requests
+
+from cco.processor import hook
+
+logger = getLogger('cco.webapi.client')
 
 
-def sendJson(url, data, cred, method='POST'):
-    try:
-        resp = requests.request(method, url, json=data, auth=cred, timeout=10)
-    except requests.exceptions.Timeout:
-        return {}, dict(state='retry')
-    # Todo: check resp.status_code
+def postJson(url, data, cred):
+    resp = requests.post(url, json=data, auth=cred, timeout=10)
+    print '*** reponse', resp.text
+    print '*** status', resp.status_code
     return resp.json(), dict(state='success')
 
+
+def notify(obj, data):
+    name = 'notifier'
+    config = obj._hook_config.get(name)
+    if config is None:
+        logger.warn('config missing: %s' % 
+            dict(hook=name, obj=obj))
+        return
+    baseUrl = config.get('url', 'http://localhost:8123')
+    cred = config.get('_credentials', ('dummy', 'dummy')) 
+    url = '/'.join((baseUrl, obj._hook_message_base, obj.identifier))
+    print '*** notify', url, data, cred
+    postJson(url, data, cred)
+
+
+hook.processor_hooks['notifier'] = notify
