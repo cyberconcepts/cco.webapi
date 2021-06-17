@@ -23,7 +23,7 @@ def postMessage(baseUrl, domain='system', action='data', class_='', item='',
     logger.info('postMessage: %s %s.' % (url, resp.status_code))
     # TODO: check resp.status_code
     #return resp.json(), dict(state='success')
-    return r.content
+    return resp.content
     
 
 def postJson(url, data, cred):
