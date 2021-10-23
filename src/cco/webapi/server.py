@@ -179,11 +179,12 @@ class TargetBase(ApiCommon, ConceptView):
     def getPostData(self):
         stream = self.request.bodyStream
         if stream is not None:
-            json = stream.read(None)
+            #json = stream.read(None)
+            json = stream.read(-1)
             self.logInfo('POST Data: ' + repr(json))
             if json:
                 return loads(json)
-        return None
+        return {}
 
     def mapInputFieldNames(self, data):
         for k1 in data:
