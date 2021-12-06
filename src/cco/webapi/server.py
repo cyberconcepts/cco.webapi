@@ -20,13 +20,15 @@
 View-like implementations for the REST API.
 """
 
+from datetime import date
 import logging
-from json import dumps, loads
+from json import loads, JSONEncoder
 from zope.app.container.traversal import ItemTraverser
 from zope.cachedescriptors.property import Lazy
 from zope import component
 from zope.traversing.api import getName
 
+from cybertools.util import format
 from loops.browser.concept import ConceptView
 from loops.browser.node import NodeView
 from loops.common import adapted, baseObject
@@ -39,8 +41,26 @@ from loops.setup import addAndConfigureObject
 
 
 logger = logging.getLogger('cco.webapi.server')
-#logger.setLevel(logging.INFO)
-logger.setLevel(logging.DEBUG)
+logger.setLevel(logging.INFO)
+#logger.setLevel(logging.DEBUG)
+
+
+class Encoder(JSONEncoder):
+
+    def default(self, obj):
+        if isinstance(obj, date):
+            return format.formatDate(obj)
+        try:
+            return JSONEncoder.default(self, obj)
+        except TypeError:
+            id = getattr(obj, 'identifier', None)
+            if id is None:
+                return repr(obj)
+            else:
+                return id
+
+def dumps(obj):
+    return Encoder().encode(obj)
 
 
 class ApiCommon(object):
@@ -58,7 +78,10 @@ class ApiCommon(object):
         self.logger.debug(message)
 
     def success(self, message='Done', **kw):
-        kw.update(dict(message=message))
+        if isinstance(message, dict):
+            kw.update(message)
+        else:
+            kw.update(dict(info=message))
         self.logger.debug(message)
         return dumps(kw)
 
@@ -181,7 +204,7 @@ class TargetBase(ApiCommon, ConceptView):
         if stream is not None:
             #json = stream.read(None)
             json = stream.read(-1)
-            self.logInfo('POST Data: ' + repr(json))
+            self.logDebug('POST Data: ' + repr(json))
             if json:
                 return loads(json)
         return {}

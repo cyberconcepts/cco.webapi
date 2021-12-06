@@ -98,9 +98,8 @@ Creating new objects with POST
 
   >>> input = '{"name": "rdf", "title": "RDF"}'
   >>> callPath(apiRoot, 'types/topic', 'POST', input=input)
-  INFO: POST Data: '{"name": "rdf", "title": "RDF"}'
   INFO: Input Data: {u'name': u'rdf', u'title': u'RDF'}
-  '{"message": "Done"}'
+  '{"info": "Done"}'
   
   >>> callPath(apiRoot, 'types/topic')
   '[{"name": "loops", "title": ""}, {"name": "rdf", "title": "RDF"}]'
@@ -110,9 +109,8 @@ Creating new objects with POST
 
   >>> input = '{"name": "task0001", "title": "Document loops WebAPI"}'
   >>> callPath(apiRoot, 'types/task', 'POST', input=input)
-  INFO: POST Data: '{"name": "task0001", "title": "Document loops WebAPI"}'
   INFO: Input Data: {u'name': u'task0001', u'title': u'Document loops WebAPI'}
-  '{"message": "Done"}'
+  '{"info": "Done"}'
 
   >>> callPath(apiRoot, 'types/task')
   '[{"name": "task0001", "title": "Document loops WebAPI"}]'
@@ -122,9 +120,8 @@ Updating objects with PUT
 
   >>> input = '{"title": "loops"}'
   >>> callPath(apiRoot, 'topics/loops', 'PUT', input=input)
-  INFO: POST Data: '{"title": "loops"}'
   INFO: Input Data: {u'title': u'loops'}
-  '{"message": "Done"}'
+  '{"info": "Done"}'
 
   >>> callPath(apiRoot, 'topics')
   '[{"name": "loops", "title": "loops"}, {"name": "rdf", "title": "RDF"}]'
@@ -135,7 +132,6 @@ Updating objects with PUT
 Let's just see what happens if we do not supply input data.
 
   >>> callPath(apiRoot, 'topics/loops', 'PUT', input='{}')
-  INFO: POST Data: '{}'
   INFO: Input Data: {}
   ERROR: Missing data
   '{"status": 500, "message": "Missing data"}'
