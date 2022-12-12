@@ -137,3 +137,16 @@ Let's just see what happens if we do not supply input data.
   '{"status": 500, "message": "Missing data"}'
 
 Create relationships (links) between objects - assign a child.
+
+... TODO ...
+
+Client module
+=============
+
+  >>> from cco.webapi.client import postMessage
+
+  >>> postMessage('test://localhost:8123/webapi', 
+  ...       'demo', 'query', 'topics', 'rdf')
+  request: POST, test://localhost:8123/webapi/demo/query/topics/rdf, None, None
+  '{"state": "success"}'
+

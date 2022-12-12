@@ -12,26 +12,33 @@ from logging import getLogger
 import requests
 
 from cco.processor import hook
+from cco.webapi import testing
 
 logger = getLogger('cco.webapi.client')
+
+
+def sendJson(url, payload, cred, method):
+    if url.startswith('test:'):
+        resp = testing.request(method, url, json=payload, auth=cred)
+    else:
+        resp = requests.request(
+                method, url, json=payload, auth=cred, timeout=10)
+    logger.info('sendJson: %s %s -> %s %s.' % (
+        method, url, resp.status_code, resp.text))
+    # TODO: check resp.status_code
+    #return resp.json(), dict(state='success')
+    return resp.content
+
+
+def postJson(url, payload, cred):
+    return sendJson(url, payload, cred, 'POST')
 
 
 def postMessage(baseUrl, domain='system', action='data', class_='', item='',
         payload=None, cred=None):
     url = '/'.join(p for p in (baseUrl, domain, action, class_, item) if p)
-    resp = requests.post(url, data=payload, auth=cred, timeout=10)
-    logger.info('postMessage: %s %s.' % (url, resp.status_code))
-    # TODO: check resp.status_code
-    #return resp.json(), dict(state='success')
-    return resp.content
+    return postJson(url, payload, cred)
     
-
-def postJson(url, data, cred):
-    resp = requests.post(url, json=data, auth=cred, timeout=10)
-    logger.info('postJson: %s %s.' % (resp.status_code, resp.text))
-    # TODO: check resp.status_code
-    return resp.json(), dict(state='success')
-
 
 def notify(obj, data):
     name = 'notifier'
