@@ -251,6 +251,8 @@ class TargetHandler(TargetBase):
 
 class ContainerHandler(TargetBase):
 
+    itemViewName = 'api_target'
+
     def getData(self):
         # TODO: check for real listing method and parameters
         #       (or produce list in the caller and use it directly as context)
@@ -265,7 +267,7 @@ class ContainerHandler(TargetBase):
         if obj is None:
             return None
         view = component.getMultiAdapter(
-                (adapted(obj), self.request), name='api_target')
+                (adapted(obj), self.request), name=self.itemViewName)
         return view
 
     def getObject(self, name):
