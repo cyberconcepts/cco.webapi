@@ -21,7 +21,11 @@ def sendJson(url, payload, cred, method):
     if url.startswith('test:'):
         resp = testing.request(method, url, json=payload, auth=cred)
     else:
-        resp = requests.request(
+        if isinstance(payload, basestring):
+            resp = requests.request(
+                method, url, data=payload, auth=cred, timeout=10)
+        else:
+            resp = requests.request(
                 method, url, json=payload, auth=cred, timeout=10)
     logger.info('sendJson: %s %s -> %s %s.' % (
         method, url, resp.status_code, resp.text))
