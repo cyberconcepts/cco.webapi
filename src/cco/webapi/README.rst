@@ -140,6 +140,18 @@ Create relationships (links) between objects - assign a child.
 
 ... TODO ...
 
+Use query handler for asynchronous querying
+-------------------------------------------
+
+(work in progress)
+
+  >>> node_query = addAndConfigureObject(apiRoot, ApiNode, 'query')
+  >>> node_query.target = type_type
+  >>> node_query.viewName = 'api_type_query'
+
+  >>> callPath(apiRoot, 'query/topic/loops')
+  '{"name": "loops", "result": "OK"}'
+
 Client module
 =============
 

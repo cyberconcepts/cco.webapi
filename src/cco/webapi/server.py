@@ -308,3 +308,18 @@ class TypeHandler(ContainerHandler):
     def create(self):
         obj = self.createObject(self.adapted)
         return self.success()
+
+
+class QueryTypeHandler(TypeHandler):
+
+    itemViewName = 'api_target_query'
+
+    def getData(self):
+        return dict(result='OK', name=self.context.__name__)
+
+
+class QueryTargetHandler(TargetHandler):
+
+    def getData(self):
+        return dict(result='OK', name=self.context.__name__)
+

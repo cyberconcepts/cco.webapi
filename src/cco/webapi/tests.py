@@ -21,6 +21,7 @@ from loops.tests.setup import TestSite
 
 from cco.webapi.server import ApiHandler, ApiTraverser
 from cco.webapi.server import TargetHandler, ContainerHandler, TypeHandler
+from cco.webapi.server import QueryTypeHandler, QueryTargetHandler
 
 
 class LogHandler(logging.StreamHandler):
@@ -48,6 +49,10 @@ def setUp(self):
         (ITypeConcept, IBrowserRequest), Interface, name='api_target')
     component.provideAdapter(TypeHandler, 
         (ITypeConcept, IBrowserRequest), Interface, name='api_container')
+    component.provideAdapter(QueryTypeHandler, 
+        (ITypeConcept, IBrowserRequest), Interface, name='api_type_query')
+    component.provideAdapter(QueryTargetHandler, 
+        (IConceptSchema, IBrowserRequest), Interface, name='api_target_query')
 
 
 def tearDown(self):
