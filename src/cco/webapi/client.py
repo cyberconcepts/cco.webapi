@@ -42,6 +42,14 @@ def postMessage(baseUrl, domain='system', action='data', class_='', item='',
         payload=None, cred=None):
     url = '/'.join(p for p in (baseUrl, domain, action, class_, item) if p)
     return postJson(url, payload, cred)
+
+
+def postStandardMessage(action='data', class_="", item='', payload=None):
+    from cco.webapi import config
+    baseUrl = config.integrator.get('url') or 'http://localhost:8123'
+    domain = config.integrator.get('domain') or 'demo'
+    cred = config.integrator.get('cred')
+    return postMessage(baseUrl, domain, action, class_, item, payload, cred)
     
 
 def notify(obj, data):

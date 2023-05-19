@@ -54,7 +54,7 @@ def setUp(self):
     component.provideAdapter(IntegratorQuery, 
         (ITypeConcept, IBrowserRequest), Interface, name='api_integrator_query')
     component.provideAdapter(IntegratorClassQuery, 
-        (IConceptSchema, IBrowserRequest), Interface, 
+        (ITypeConcept, IBrowserRequest), Interface, 
         name='api_integrator_class_query')
     component.provideAdapter(IntegratorItemQuery, 
         (IConceptSchema, IBrowserRequest), Interface, 

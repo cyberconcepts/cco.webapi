@@ -34,6 +34,7 @@ from loops.browser.node import NodeView
 from loops.common import adapted, baseObject
 from loops.concept import Concept
 from loops.setup import addAndConfigureObject
+from cco.webapi.client import postStandardMessage
 
 # provide lower-level (RDF-like?) API for accessing the concept map
 # in a simple and generic way. 
@@ -117,11 +118,11 @@ class ApiHandler(ApiCommon, NodeView):
         #self.logInfo('*** NodeView: traversing ' + name)
         targetView = self.viewAnnotations.get('targetView')
         if targetView is not None:
-            cv = self.getContainerView(targetView.adapted)
-            if cv is None:
-                targetView = targetView.getView(name)
-            else:
-                targetView = cv.getView(name)
+            #cv = self.getContainerView(targetView.adapted)
+            #if cv is None:
+            targetView = targetView.getView(name)
+            #else:
+            #    targetView = cv.getView(name)
         else:
             target = self.context.target
             if target is None:
@@ -315,12 +316,14 @@ class IntegratorQuery(TypeHandler):
     itemViewName = 'api_integrator_class_query'
 
 
-class IntegratorClassQuery(TargetHandler):
+class IntegratorClassQuery(TypeHandler):
 
     itemViewName = 'api_integrator_item_query'
 
     def getData(self):
-        return dict(result='OK', level='class', name=self.context.__name__)
+        return postStandardMessage('data', 
+            self.getName(self.context), payload={})
+        #return dict(result='OK', level='class', name=self.context.__name__)
 
 
 class IntegratorItemQuery(TargetHandler):
