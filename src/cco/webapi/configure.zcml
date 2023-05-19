@@ -124,4 +124,28 @@
       factory="cco.webapi.server.TypeHandler"
       permission="cco.webapi.Get" />
 
+  <zope:adapter
+      name="api_integrator_query"
+      for="loops.interfaces.ITypeConcept
+           zope.publisher.interfaces.http.IHTTPRequest"
+      provides="zope.interface.Interface"
+      factory="cco.webapi.server.IntegratorQuery"
+      permission="cco.webapi.Get" />
+
+  <zope:adapter
+      name="api_integrator_class_query"
+      for="loops.interfaces.ITypeConcept
+           zope.publisher.interfaces.http.IHTTPRequest"
+      provides="zope.interface.Interface"
+      factory="cco.webapi.server.IntegratorClassQuery"
+      permission="cco.webapi.Get" />
+
+  <zope:adapter
+      name="api_integrator_item_query"
+      for="loops.interfaces.IConceptSchema
+           zope.publisher.interfaces.http.IHTTPRequest"
+      provides="zope.interface.Interface"
+      factory="cco.webapi.server.IntegratorItemQuery"
+      permission="cco.webapi.Get" />
+
 </configure>
