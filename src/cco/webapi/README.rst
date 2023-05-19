@@ -140,18 +140,6 @@ Create relationships (links) between objects - assign a child.
 
 ... TODO ...
 
-Use query handler for asynchronous querying
--------------------------------------------
-
-(work in progress)
-
-  >>> node_query = addAndConfigureObject(apiRoot, ApiNode, 'query')
-  >>> node_query.target = type_type
-  >>> node_query.viewName = 'api_type_query'
-
-  >>> callPath(apiRoot, 'query/topic/loops')
-  '{"name": "loops", "result": "OK"}'
-
 Client module
 =============
 
@@ -161,4 +149,24 @@ Client module
   ...       'demo', 'query', 'topics', 'rdf')
   request: POST, test://localhost:8123/webapi/demo/query/topics/rdf, None, None
   '{"state": "success"}'
+
+Asynchronous processing of integrator messages
+==============================================
+
+(work in progress)
+
+  >>> node_domain = addAndConfigureObject(apiRoot, ApiNode, 'demo')
+  >>> node_query = addAndConfigureObject(node_domain, ApiNode, 'query')
+  >>> node_query.target = type_type
+  >>> node_query.viewName = 'api_integrator_query'
+
+  >>> callPath(apiRoot, 'demo/query/topic')
+  '{"level": "class", "result": "OK", "name": "topic"}'
+
+  >>> callPath(apiRoot, 'demo/query/topic/loops')
+  '{"level": "class", "result": "OK", "name": "loops"}'
+
+  >>> import cco.webapi
+  >>> cco.webapi.config.integrator
+  {'url': 'test://localhost:8123/webapi'}
 

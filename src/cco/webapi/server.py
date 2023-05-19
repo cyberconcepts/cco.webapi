@@ -26,7 +26,7 @@ from json import loads, JSONEncoder
 from zope.app.container.traversal import ItemTraverser
 from zope.cachedescriptors.property import Lazy
 from zope import component
-from zope.traversing.api import getName
+from zope.traversing.api import getName, getParent
 
 from cybertools.util import format
 from loops.browser.concept import ConceptView
@@ -310,16 +310,21 @@ class TypeHandler(ContainerHandler):
         return self.success()
 
 
-class QueryTypeHandler(TypeHandler):
+class IntegratorQuery(TypeHandler):
 
-    itemViewName = 'api_target_query'
+    itemViewName = 'api_integrator_class_query'
+
+
+class IntegratorClassQuery(TargetHandler):
+
+    itemViewName = 'api_integrator_item_query'
 
     def getData(self):
-        return dict(result='OK', name=self.context.__name__)
+        return dict(result='OK', level='class', name=self.context.__name__)
 
 
-class QueryTargetHandler(TargetHandler):
+class IntegratorItemQuery(TargetHandler):
 
     def getData(self):
-        return dict(result='OK', name=self.context.__name__)
+        return dict(result='OK', level='item', name=self.context.__name__)
 
