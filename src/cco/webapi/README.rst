@@ -155,7 +155,8 @@ Client module
 Asynchronous processing of integrator messages
 ==============================================
 
-(work in progress)
+query action
+------------
 
   >>> node_domain = addAndConfigureObject(apiRoot, ApiNode, 'demo')
   >>> node_query = addAndConfigureObject(node_domain, ApiNode, 'query')
@@ -174,4 +175,34 @@ Asynchronous processing of integrator messages
   {"title": "loops"}
   auth: None
   '"{\\"state\\": \\"success\\"}"'
+
+data action
+-----------
+
+  >>> node_data = addAndConfigureObject(node_domain, ApiNode, 'data')
+  >>> node_data.target = type_type
+
+  >>> input = '{"name": "typescript", "title": "Typescript"}'
+  >>> callPath(apiRoot, 'demo/data/topic', 'POST', input=input)
+  INFO: Input Data: {u'name': u'typescript', u'title': u'Typescript'}
+  '{"info": "Done"}'
+
+  >>> input = '{"title": "TypeScript"}'
+  >>> callPath(apiRoot, 'demo/data/topic/typescript', 'POST', input=input)
+  INFO: Input Data: {u'title': u'TypeScript'}
+  '{"info": "Done"}'
+
+  >>> input = '{"title": "TypeScript"}'
+  >>> callPath(apiRoot, 'demo/data/topic/typescript', 'POST', input=input)
+  INFO: Input Data: {u'title': u'TypeScript'}
+  '{"info": "Done"}'
+
+  >>> callPath(apiRoot, 'demo/query/topic')
+  request: POST test://localhost:8123/webapi/demo/list/topic
+  {"title": "loops", "_item": "loops"}
+  {"title": "RDF", "_item": "rdf"}
+  {"title": "TypeScript", "_item": "typescript"}
+  auth: None
+  '"{\\"state\\": \\"success\\"}"'
+
 

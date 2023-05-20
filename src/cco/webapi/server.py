@@ -232,6 +232,9 @@ class TargetBase(ApiCommon, ConceptView):
 
 
 class TargetHandler(TargetBase):
+    
+    def create(self):
+        return self.update()
 
     def getView(self, name):
         cname = self.routes.get(name)
@@ -323,7 +326,7 @@ class IntegratorClassQuery(TypeHandler):
     def getData(self):
         class_ = self.getName(self.context)
         lst = self.adapted.typeInstances
-        data = [dumps(dict(_item=self.getName(obj), title=obj.title)) 
+        data = [dumps(dict(_item=self.getName(obj), title=obj.title))
                 for obj in lst]
         return postStandardMessage('list', class_, payload='\n'.join(data))
 
