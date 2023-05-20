@@ -15,7 +15,7 @@ class Response(object):
 
 
 def request(method, url, json, auth):
-    print('request: %s, %s, %s, %s' % (method, url, json, auth))
+    print('request: %s %s\n%s\nauth: %s' % (method, url, json, auth))
     result = '{"state": "success"}'
     return Response(200, result, result)
 

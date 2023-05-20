@@ -147,7 +147,9 @@ Client module
 
   >>> postMessage('test://localhost:8123/webapi', 
   ...       'demo', 'query', 'topics', 'rdf')
-  request: POST, test://localhost:8123/webapi/demo/query/topics/rdf, None, None
+  request: POST test://localhost:8123/webapi/demo/query/topics/rdf
+  None
+  auth: None
   '{"state": "success"}'
 
 Asynchronous processing of integrator messages
@@ -161,10 +163,15 @@ Asynchronous processing of integrator messages
   >>> node_query.viewName = 'api_integrator_query'
 
   >>> callPath(apiRoot, 'demo/query/topic')
-  request: POST, test://localhost:8123/webapi/demo/list/topic, [{"item": "loops", "title": "loops"}, {"item": "rdf", "title": "RDF"}], None
+  request: POST test://localhost:8123/webapi/demo/list/topic
+  {"title": "loops", "_item": "loops"}
+  {"title": "RDF", "_item": "rdf"}
+  auth: None
   '"{\\"state\\": \\"success\\"}"'
 
   >>> callPath(apiRoot, 'demo/query/topic/loops')
-  request: POST, test://localhost:8123/webapi/demo/data/topic/loops, {"title": "loops"}, None
+  request: POST test://localhost:8123/webapi/demo/data/topic/loops
+  {"title": "loops"}
+  auth: None
   '"{\\"state\\": \\"success\\"}"'
 

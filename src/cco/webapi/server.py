@@ -296,7 +296,7 @@ class ContainerHandler(TargetBase):
 class TypeHandler(ContainerHandler):
 
     def getData(self):
-        lst = self.context.getChildren([self.typePredicate])
+        lst = self.adapted.typeInstances
         return [dict(name=self.getName(obj), title=obj.title) for obj in lst]
 
     def getObject(self, name):
@@ -322,9 +322,10 @@ class IntegratorClassQuery(TypeHandler):
 
     def getData(self):
         class_ = self.getName(self.context)
-        lst = self.context.getChildren([self.typePredicate])
-        data = [dict(item=self.getName(obj), title=obj.title) for obj in lst]
-        return postStandardMessage('list', class_, payload=dumps(data))
+        lst = self.adapted.typeInstances
+        data = [dumps(dict(_item=self.getName(obj), title=obj.title)) 
+                for obj in lst]
+        return postStandardMessage('list', class_, payload='\n'.join(data))
 
 
 class IntegratorItemQuery(TargetHandler):
