@@ -161,13 +161,10 @@ Asynchronous processing of integrator messages
   >>> node_query.viewName = 'api_integrator_query'
 
   >>> callPath(apiRoot, 'demo/query/topic')
-  request: POST, test://localhost:8123/webapi/demo/data/topic, {}, None
+  request: POST, test://localhost:8123/webapi/demo/list/topic, [{"item": "loops", "title": "loops"}, {"item": "rdf", "title": "RDF"}], None
   '"{\\"state\\": \\"success\\"}"'
 
   >>> callPath(apiRoot, 'demo/query/topic/loops')
-  '{"level": "item", "result": "OK", "name": "loops"}'
-
-  >>> import cco.webapi
-  >>> cco.webapi.config.integrator
-  {'url': 'test://localhost:8123/webapi'}
+  request: POST, test://localhost:8123/webapi/demo/data/topic/loops, {"title": "loops"}, None
+  '"{\\"state\\": \\"success\\"}"'
 

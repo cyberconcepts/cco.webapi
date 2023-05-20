@@ -22,7 +22,7 @@ View-like implementations for the REST API.
 
 from datetime import date
 import logging
-from json import loads, JSONEncoder
+from json import dumps, loads, JSONEncoder
 from zope.app.container.traversal import ItemTraverser
 from zope.cachedescriptors.property import Lazy
 from zope import component
@@ -321,13 +321,17 @@ class IntegratorClassQuery(TypeHandler):
     itemViewName = 'api_integrator_item_query'
 
     def getData(self):
-        return postStandardMessage('data', 
-            self.getName(self.context), payload={})
-        #return dict(result='OK', level='class', name=self.context.__name__)
+        class_ = self.getName(self.context)
+        lst = self.context.getChildren([self.typePredicate])
+        data = [dict(item=self.getName(obj), title=obj.title) for obj in lst]
+        return postStandardMessage('list', class_, payload=dumps(data))
 
 
 class IntegratorItemQuery(TargetHandler):
 
     def getData(self):
-        return dict(result='OK', level='item', name=self.context.__name__)
+        class_ = self.getName(self.context.getType())
+        item = self.getName(self.context)
+        data = dict(title=self.context.title)
+        return postStandardMessage('data', class_, item, payload=dumps(data))
 
